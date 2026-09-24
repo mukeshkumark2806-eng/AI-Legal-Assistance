@@ -106,4 +106,29 @@ describe('BUILD 6 — Footer Navigation, Compliance Pages, & Header UX', () => {
     assert.ok(complianceCode.includes('never exposed'), 'Confirms API key is never exposed to browser');
     assert.ok(complianceCode.includes('do not advertise unverified security certifications'), 'Explicitly disclaims unverified certifications');
   });
+
+  test('10. Settings Cleanup: Removed fake AI model options, Phase 2, and fake provider cards', () => {
+    const settingsPath = path.join(projectRoot, 'src', 'components', 'navigation', 'SettingsModal.tsx');
+    const settingsCode = fs.readFileSync(settingsPath, 'utf8');
+
+    // Fake model options must be gone
+    assert.ok(!settingsCode.includes('Gemini 2.0 Flash / Pro'), 'No fake Gemini option');
+    assert.ok(!settingsCode.includes('Claude 3.5 Sonnet'), 'No fake Claude option');
+    assert.ok(!settingsCode.includes('GPT-4o'), 'No fake GPT-4o option');
+    assert.ok(!settingsCode.includes('GenAI Engine Integration (Phase 2 Ready)'), 'No fake Phase 2 placeholder');
+    assert.ok(!settingsCode.includes('Zero Data Retention Guarantee'), 'No unsupported zero retention guarantee');
+    assert.ok(!settingsCode.includes('Enforce Client-Side Redaction'), 'No fake client-side redaction toggle');
+  });
+
+  test('11. Settings Factual Info: Displays actual Document Analysis Engine and processing architecture', () => {
+    const settingsPath = path.join(projectRoot, 'src', 'components', 'navigation', 'SettingsModal.tsx');
+    const settingsCode = fs.readFileSync(settingsPath, 'utf8');
+
+    assert.ok(settingsCode.includes('Document Analysis Active'), 'Displays Document Analysis Active status');
+    assert.ok(settingsCode.includes('gpt-oss-120b'), 'Displays actual model gpt-oss-120b');
+    assert.ok(settingsCode.includes('Configured by application'), 'Indicates model is configured by application (non-selectable)');
+    assert.ok(settingsCode.includes('Server-side document analysis'), 'States server-side document analysis');
+    assert.ok(settingsCode.includes('API credentials remain server-side'), 'States API credentials remain server-side');
+    assert.ok(settingsCode.includes('Answers are generated using the uploaded document as the source context'), 'States grounded document context');
+  });
 });
