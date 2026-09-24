@@ -263,7 +263,7 @@ export async function compareDocumentsWithAi(
 
     console.error('Comparison API error:', err);
     throw new ApiError(
-      err.message || 'Unable to connect to LegalLens AI comparison server.',
+      err.message || 'Unable to connect to LegalLens comparison server.',
       'NETWORK_ERROR',
       503
     );

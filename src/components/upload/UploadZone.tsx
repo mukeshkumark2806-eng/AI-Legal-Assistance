@@ -87,7 +87,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
     setIsAnalyzingAi(true);
     setAiErrorMessage(null);
     setAiStageStep(2);
-    setAiStageText('Analyzing clauses with Groq GenAI...');
+    setAiStageText('Analyzing clauses and obligations...');
 
     try {
       const fullDoc = await analyzeDocumentWithAi(docToAnalyze, (update) => {
@@ -216,7 +216,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
             Analyze a legal document
           </h3>
           <p className="text-sm text-slate-500 max-w-md mt-1.5 leading-relaxed">
-            Upload an agreement, contract, policy, notice, or other legal document for real-time text extraction and structured Groq GenAI analysis.
+            Upload an agreement, contract, policy, notice, or other legal document for real-time text extraction and structured document analysis.
           </p>
 
           <div className="mt-5 flex items-center gap-3">
@@ -247,7 +247,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
             <span>Up to 25 MB max file size</span>
             <span className="text-slate-400">•</span>
             <span className="inline-flex items-center gap-1 text-slate-500">
-              <Sparkles className="w-3 h-3 text-indigo-600" /> Groq AI Powered
+              <Sparkles className="w-3 h-3 text-indigo-600" /> Analysis Active
             </span>
           </div>
         </div>
@@ -275,7 +275,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
                   </span>
                 </div>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Size: {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • {isAnalyzingAi ? 'Groq GenAI Inference in progress' : analyzedDoc ? 'Groq GenAI Analysis complete' : 'Extracted locally in-browser'}
+                  Size: {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • {isAnalyzingAi ? 'Document analysis in progress' : analyzedDoc ? 'Document analysis complete' : 'Extracted locally in-browser'}
                 </p>
               </div>
             </div>
@@ -301,7 +301,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
                 ) : isAnalyzingAi ? (
                   <>
                     <RefreshCw className="w-3.5 h-3.5 text-indigo-600 animate-spin" />
-                    <span>Analyzing with LegalLens AI ({aiStageText})</span>
+                    <span>Analyzing with LegalLens ({aiStageText})</span>
                   </>
                 ) : progress?.stage !== 'ready' && progress ? (
                   <>
@@ -373,7 +373,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
               <div className="flex items-start gap-2">
                 <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                 <div>
-                  <h5 className="font-bold text-rose-900">GenAI Inference Notice</h5>
+                  <h5 className="font-bold text-rose-900">Document Analysis Notice</h5>
                   <p className="mt-0.5 leading-relaxed text-[11px] text-rose-800">{aiErrorMessage}</p>
                 </div>
               </div>
@@ -386,7 +386,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
                     onClick={() => executeAiAnalysis(extractedDoc)}
                     icon={<RefreshCw className="w-3.5 h-3.5" />}
                   >
-                    Retry AI Analysis
+                    Retry Analysis
                   </Button>
                 )}
                 <Button
@@ -434,7 +434,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
           {/* Legal Safety Notice */}
           <div className="flex items-center gap-1.5 text-[10px] text-slate-500 pt-1">
             <ShieldCheck className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-            <span>LegalLens AI provides informational assistance based on the uploaded document and does not replace professional legal advice.</span>
+            <span>LegalLens provides informational assistance based on the uploaded document and does not replace professional legal advice.</span>
           </div>
 
           {/* Action Buttons */}
@@ -534,7 +534,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
 
         <div className="mt-3 flex items-center gap-1.5 text-[11px] text-slate-400 justify-center">
           <Info className="w-3 h-3" />
-          <span>Real uploaded documents are analyzed dynamically using server-side Groq GenAI.</span>
+          <span>Real uploaded documents are analyzed dynamically using server-side document intelligence.</span>
         </div>
       </div>
     </div>

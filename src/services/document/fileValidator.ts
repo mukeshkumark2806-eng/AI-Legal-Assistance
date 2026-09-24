@@ -57,7 +57,7 @@ export function validateLegalFile(file: File): FileValidationResult {
     return {
       isValid: false,
       formattedSize,
-      error: `Unsupported file type (${fileName.split('.').pop()?.toUpperCase() || 'unknown'}). LegalLens AI currently supports PDF (.pdf) and Word (.docx) documents.`
+      error: `Unsupported file type (${fileName.split('.').pop()?.toUpperCase() || 'unknown'}). LegalLens currently supports PDF (.pdf) and Word (.docx) documents.`
     };
   }
 

@@ -91,7 +91,7 @@ export async function analyzeDocumentWithAi(
   }
 
   // Realistic stage progression
-  onProgress?.({ stage: 'Connecting to LegalLens AI pipeline...', percent: 15 });
+  onProgress?.({ stage: 'Connecting to LegalLens pipeline...', percent: 15 });
 
   // Input sections with verified canonical metadata
   const inputSections = doc.sections.map((s) => ({
@@ -201,7 +201,7 @@ export async function analyzeDocumentWithAi(
     // Network / connection failure
     if (err.name === 'TypeError' && err.message.includes('fetch')) {
       throw new ApiError(
-        'Cannot connect to LegalLens AI backend. Please verify that the backend server is running.',
+        'Cannot connect to LegalLens backend. Please verify that the backend server is running.',
         'BACKEND_UNAVAILABLE',
         503
       );

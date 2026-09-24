@@ -190,7 +190,7 @@ export const AnalysisSection: React.FC<AnalysisSectionProps> = ({
           <div>
             <span className="font-semibold block">Demo Document • Pre-rendered Sample Analysis</span>
             <span className="text-amber-800 text-[11px]">
-              Displaying sample analysis for demo exploration. Upload your own PDF or DOCX file for live Groq GenAI analysis.
+              Displaying sample analysis for demo exploration. Upload your own PDF or DOCX file for live document analysis.
             </span>
           </div>
         </div>

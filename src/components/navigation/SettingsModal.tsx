@@ -31,7 +31,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
       isOpen={isOpen}
       onClose={onClose}
       title="Application Settings & Preferences"
-      subtitle="Configure LegalLens AI document intelligence, model parameters, and data security policies."
+      subtitle="Configure LegalLens document intelligence, model parameters, and data security policies."
       maxWidth="2xl"
     >
       <div className="flex flex-col sm:flex-row gap-6">

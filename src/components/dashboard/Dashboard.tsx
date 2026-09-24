@@ -46,7 +46,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             {/* Subtle Pill Badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-slate-200/90 text-xs text-slate-700 shadow-2xs mb-6">
               <span className="flex h-2 w-2 rounded-full bg-indigo-600" />
-              <span className="font-semibold text-slate-900">LegalLens AI</span>
+              <span className="font-semibold text-slate-900">LegalLens</span>
               <span className="text-slate-400">•</span>
               <span className="text-slate-500">Document Intelligence Platform</span>
             </div>
@@ -58,7 +58,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             {/* Subtitle */}
             <p className="mt-5 text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto">
-              AI-powered assistance for understanding, analyzing and navigating legal documents.
+              Intelligent assistance for understanding, analyzing and navigating legal documents.
             </p>
 
             {/* Primary & Secondary CTAs */}
@@ -87,7 +87,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="mt-8 flex items-center justify-center gap-2 text-xs text-slate-500 max-w-xl mx-auto">
               <Shield className="w-3.5 h-3.5 text-slate-400 shrink-0" />
               <span>
-                LegalLens AI provides informational assistance and does not replace professional legal advice.
+                LegalLens provides informational assistance based on the uploaded document and does not replace professional legal advice.
               </span>
             </div>
           </div>
@@ -187,7 +187,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               Try the Analysis Workspace right now.
             </h2>
             <p className="text-sm text-slate-300 mt-2 leading-relaxed">
-              Explore how LegalLens AI extracts key obligations, important deadlines, and risk factors from a verified commercial Master Services Agreement.
+              Explore how LegalLens extracts key obligations, important deadlines, and risk factors from a verified commercial Master Services Agreement.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">

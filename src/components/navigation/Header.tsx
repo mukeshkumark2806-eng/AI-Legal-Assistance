@@ -129,17 +129,17 @@ export const Header: React.FC<HeaderProps> = ({
               <Settings className="w-4 h-4" />
             </button>
 
-            {/* Profile Avatar */}
+            {/* Guest / Workspace State Indicator */}
             <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-              <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-medium text-xs">
-                JD
+              <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 border border-slate-200 flex items-center justify-center font-medium text-xs">
+                <User className="w-4 h-4 text-slate-500" />
               </div>
               <div className="hidden lg:block text-left">
                 <span className="text-xs font-semibold text-slate-800 block leading-tight">
-                  Legal Team
+                  Guest
                 </span>
                 <span className="text-[10px] text-slate-400 block font-mono">
-                  Enterprise
+                  Document Workspace
                 </span>
               </div>
             </div>

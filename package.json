@@ -9,7 +9,7 @@
     "server": "tsx server/index.ts",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "test": "tsx --test tests/build5a-section-accuracy.test.mjs tests/build5b-clause-mapping.test.mjs tests/build3-genai.test.mjs tests/e2e-file-analysis.test.mjs tests/build4-comparison.test.mjs"
+    "test": "tsx --test tests/build5a-section-accuracy.test.mjs tests/build5b-clause-mapping.test.mjs tests/build3-genai.test.mjs tests/e2e-file-analysis.test.mjs tests/build4-comparison.test.mjs tests/build6-footer-navigation.test.mjs"
   },
   "dependencies": {
     "cors": "^2.8.6",

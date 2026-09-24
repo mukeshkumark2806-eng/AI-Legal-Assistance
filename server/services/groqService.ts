@@ -70,9 +70,17 @@ class GroqClientManager {
       // If primary model failed due to model_not_found or temporary rate limit, try fallback model if different
       if (
         primaryModel !== this.fallbackModel &&
-        (err?.status === 404 || err?.error?.code === 'model_not_found' || err?.status === 429)
+        (err?.status === 404 || err?.error?.code === 'model_not_found' || err?.status === 429 || err?.error?.code === 'json_validate_failed')
       ) {
-        console.warn(`Primary model ${primaryModel} encountered issue (${err?.message}). Trying fallback ${this.fallbackModel}...`);
+        if (err?.status === 429) {
+          const match = String(err?.message || '').match(/try again in ([0-9.]+)s/i);
+          const waitMs = match ? Math.ceil(parseFloat(match[1]) * 1000) + 1000 : 10000;
+          console.warn(`Primary model rate limited. Waiting ${waitMs}ms before trying fallback ${this.fallbackModel}...`);
+          await new Promise((r) => setTimeout(r, Math.min(waitMs, 25000)));
+        } else {
+          console.warn(`Primary model ${primaryModel} encountered issue (${err?.message}). Trying fallback ${this.fallbackModel}...`);
+        }
+
         try {
           const fallbackCompletion = await client.chat.completions.create({
             model: this.fallbackModel,
@@ -86,7 +94,25 @@ class GroqClientManager {
           if (text) {
             return { content: text, model: this.fallbackModel };
           }
-        } catch (fallbackErr) {
+        } catch (fallbackErr: any) {
+          if (fallbackErr?.status === 429) {
+            const match2 = String(fallbackErr?.message || '').match(/try again in ([0-9.]+)s/i);
+            const waitMs2 = match2 ? Math.ceil(parseFloat(match2[1]) * 1000) + 1000 : 12000;
+            console.warn(`Fallback also rate limited. Waiting ${waitMs2}ms before retry...`);
+            await new Promise((r) => setTimeout(r, Math.min(waitMs2, 25000)));
+
+            const retryCompletion = await client.chat.completions.create({
+              model: this.fallbackModel,
+              messages: params.messages,
+              response_format: { type: 'json_object' },
+              temperature: params.temperature ?? 0.1,
+              max_completion_tokens: params.maxTokens ?? 8192
+            });
+            const text2 = retryCompletion.choices[0]?.message?.content;
+            if (text2) {
+              return { content: text2, model: this.fallbackModel };
+            }
+          }
           console.error('Fallback model also failed:', fallbackErr);
         }
       }

@@ -644,7 +644,7 @@ export const INITIAL_CHAT_MESSAGES = [
   {
     id: 'msg-1',
     sender: 'assistant' as const,
-    text: 'Hello! I am your LegalLens AI assistant. I have reviewed the Master Services Agreement between CloudScale Technologies and Apex Enterprises.\n\nYou can ask any question about obligations, deadlines, liabilities, or termination rules. Or tap one of the suggested prompts below to start.',
+    text: 'Hello! I am your LegalLens Document Assistant. I have reviewed the Master Services Agreement between CloudScale Technologies and Apex Enterprises.\n\nYou can ask any question about obligations, deadlines, liabilities, or termination rules. Or tap one of the suggested prompts below to start.',
     timestamp: '10:00 AM'
   }
 ];

@@ -96,7 +96,7 @@ export type KeyObligation = z.infer<typeof KeyObligationSchema>;
 export const ImportantDateSchema = z.object({
   id: z.string(),
   title: z.string().describe('Title of the milestone or date event'),
-  date: z.string().describe('Date string or relative period like "30 days after signing"'),
+  date: z.preprocess((val) => (val === null || val === undefined ? 'Not specified in document' : String(val)), z.string()).describe('Date string or relative period like "30 days after signing"'),
   type: z.preprocess((val) => {
     if (typeof val !== 'string') return 'Deadline';
     const v = toTitleCase(val.trim());

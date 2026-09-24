@@ -11,6 +11,8 @@ import { ComparisonPanel } from './components/comparison/ComparisonPanel';
 import { MyDocuments } from './components/dashboard/MyDocuments';
 import { UploadModal } from './components/upload/UploadModal';
 import { SettingsModal } from './components/navigation/SettingsModal';
+import { ComplianceModal } from './components/compliance/ComplianceModal';
+import type { ComplianceDocType } from './components/compliance/ComplianceModal';
 
 export const App: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<NavTab>('dashboard');
@@ -18,6 +20,7 @@ export const App: React.FC = () => {
   const [uploadedDocuments, setUploadedDocuments] = useState<LegalDocument[]>([]);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState<boolean>(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState<boolean>(false);
+  const [activeComplianceModal, setActiveComplianceModal] = useState<ComplianceDocType | null>(null);
 
   // Called when a real PDF or DOCX file has been parsed locally in the browser
   const handleDocumentParsed = (parsedDoc: LegalDocument) => {
@@ -92,7 +95,10 @@ export const App: React.FC = () => {
 
       {/* Global Footer (hidden on workspace to preserve full viewport height) */}
       {currentTab !== 'workspace' && (
-        <Footer onNavigate={(tab) => setCurrentTab(tab)} />
+        <Footer 
+          onNavigate={(tab) => setCurrentTab(tab)} 
+          onOpenCompliance={(type) => setActiveComplianceModal(type)}
+        />
       )}
 
       {/* Upload Modal */}
@@ -107,6 +113,17 @@ export const App: React.FC = () => {
       <SettingsModal
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
+      />
+
+      {/* Compliance & Transparency Modal */}
+      <ComplianceModal
+        type={activeComplianceModal}
+        onClose={() => setActiveComplianceModal(null)}
+        onSelectType={(t) => setActiveComplianceModal(t)}
+        onNavigateToWorkspace={() => {
+          setActiveComplianceModal(null);
+          setCurrentTab('workspace');
+        }}
       />
     </div>
   );

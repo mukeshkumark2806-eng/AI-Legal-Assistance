@@ -142,7 +142,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({ document: doc, onJumpToCla
         botResponseText = canned.answer;
         citations = canned.citations;
       } else {
-        botResponseText = `[Demo Response] Based on the indexed agreement:\n\nRegarding "${textToSend}":\n\n• **Governing Terms:** Review Section 3.0 (Term & Termination) and Section 4.0 (Invoicing & Fees) for specific conditions.\n• **Advisory Note:** Real uploaded documents use the live Groq pipeline for document-grounded answers with exact citations.\n• **Important:** This informational response does not constitute legal counsel.`;
+        botResponseText = `[Demo Response] Based on the indexed agreement:\n\nRegarding "${textToSend}":\n\n• **Governing Terms:** Review Section 3.0 (Term & Termination) and Section 4.0 (Invoicing & Fees) for specific conditions.\n• **Advisory Note:** Real uploaded documents use live document analysis for grounded answers with exact citations.\n• **Important:** This informational response does not constitute legal counsel.`;
         citations = [
           { clauseRef: 'Section 3.0', title: 'Term & Renewal', pageNumber: 3 },
           { clauseRef: 'Section 4.0', title: 'Fees & Invoicing', pageNumber: 4 }
