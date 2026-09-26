@@ -1,4 +1,4 @@
-import { groqService, GroqServiceError } from './groqService.ts';
+import { groqService, GroqServiceError, safeParseJson } from './groqService.ts';
 import {
   DocumentQuestionResponseSchema,
   type DocumentQuestionRequest,
@@ -162,7 +162,7 @@ Analyze only the provided excerpts above. The supplied section numbers and title
   // 4. Parse JSON
   let parsed: any;
   try {
-    parsed = JSON.parse(completion.content);
+    parsed = safeParseJson(completion.content);
   } catch (err) {
     throw new GroqServiceError('Failed to parse AI response for document Q&A.', 502, 'INVALID_JSON');
   }

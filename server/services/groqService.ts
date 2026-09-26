@@ -15,23 +15,69 @@ export class GroqServiceError extends Error {
   }
 }
 
+/**
+ * Robust JSON parser with automatic markdown fence stripping and syntax repair for LLM responses.
+ */
+export function safeParseJson<T = any>(rawText: string): T {
+  let clean = (rawText || '').trim();
+  if (clean.includes('```')) {
+    const match = clean.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+    if (match && match[1]) {
+      clean = match[1].trim();
+    } else {
+      clean = clean.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+    }
+  }
+
+  const firstBrace = clean.indexOf('{');
+  const lastBrace = clean.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace > firstBrace) {
+    clean = clean.substring(firstBrace, lastBrace + 1);
+  }
+
+  try {
+    return JSON.parse(clean);
+  } catch (firstErr) {
+    try {
+      let repaired = clean.replace(/,\s*([\}\]])/g, '$1');
+      repaired = repaired.replace(/,\s*"[^"]*$/, '');
+      repaired = repaired.replace(/,\s*$/, '');
+
+      const openBraces = (repaired.match(/\{/g) || []).length;
+      const closeBraces = (repaired.match(/\}/g) || []).length;
+      const openBrackets = (repaired.match(/\[/g) || []).length;
+      const closeBrackets = (repaired.match(/\]/g) || []).length;
+
+      for (let i = 0; i < openBrackets - closeBrackets; i++) repaired += ']';
+      for (let i = 0; i < openBraces - closeBraces; i++) repaired += '}';
+
+      return JSON.parse(repaired);
+    } catch (_secondErr) {
+      throw firstErr;
+    }
+  }
+}
+
 class GroqClientManager {
   private client: Groq | null = null;
-  private defaultModel = 'llama-3.3-70b-versatile';
-  private fallbackModel = 'llama-3.1-8b-instant';
+  private defaultModel = 'openai/gpt-oss-20b';
+  private fallbackModel = 'openai/gpt-oss-120b';
 
   // Known valid Groq model IDs — prevents invalid GROQ_MODEL env vars from crashing the server
   private validModels = new Set([
+    'openai/gpt-oss-120b',
+    'openai/gpt-oss-20b',
+    'openai/gpt-oss-safeguard-20b',
+    'qwen/qwen3.8-27b',
+    'allam-2-7b',
     'llama-3.3-70b-versatile',
     'llama-3.1-70b-versatile',
     'llama-3.1-8b-instant',
     'llama3-70b-8192',
     'llama3-8b-8192',
-    'llama-3.3-70b-specdec',
     'mixtral-8x7b-32768',
     'gemma2-9b-it',
-    'deepseek-r1-distill-llama-70b',
-    'qwen-2.5-coder-32b'
+    'deepseek-r1-distill-llama-70b'
   ]);
 
   public getModel(): string {
@@ -62,6 +108,17 @@ class GroqClientManager {
   }
 
   /**
+   * Helper to strip markdown code blocks if the LLM wraps JSON response in ```json ... ```
+   */
+  private sanitizeJsonContent(rawText: string): string {
+    let clean = rawText.trim();
+    if (clean.startsWith('```')) {
+      clean = clean.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+    }
+    return clean;
+  }
+
+  /**
    * Safe wrapper around Groq Chat Completions with structured JSON output and automatic model fallback.
    */
   public async createJsonChatCompletion(params: {
@@ -71,14 +128,14 @@ class GroqClientManager {
   }): Promise<{ content: string; model: string }> {
     const client = this.getClient();
     const primaryModel = this.getModel();
+    const maxTokens = params.maxTokens ?? 4000;
 
     try {
       const completion = await client.chat.completions.create({
         model: primaryModel,
         messages: params.messages,
-        response_format: { type: 'json_object' },
         temperature: params.temperature ?? 0.1,
-        max_completion_tokens: params.maxTokens ?? 4000
+        max_completion_tokens: maxTokens
       });
 
       const text = completion.choices[0]?.message?.content;
@@ -86,29 +143,43 @@ class GroqClientManager {
         throw new GroqServiceError('Groq returned an empty response.', 502, 'EMPTY_RESPONSE');
       }
 
-      return { content: text, model: primaryModel };
+      return { content: this.sanitizeJsonContent(text), model: primaryModel };
     } catch (err: any) {
-      // If primary model failed due to model_not_found, 404, rate limit (429), or json format error, immediately try fast fallback model
-      if (
-        primaryModel !== this.fallbackModel &&
-        (err?.status === 404 || err?.status === 429 || err?.error?.code === 'model_not_found' || err?.error?.code === 'json_validate_failed')
-      ) {
-        console.warn(`Primary model ${primaryModel} failed (${err?.message || err?.status}). Immediately calling fast fallback ${this.fallbackModel}...`);
+      // If primary model failed due to 404, 429, 400, or network error, immediately try fallback model
+      if (primaryModel !== this.fallbackModel) {
+        console.warn(`Primary model ${primaryModel} failed (${err?.message || err?.status}). Trying fallback ${this.fallbackModel}...`);
 
         try {
           const fallbackCompletion = await client.chat.completions.create({
             model: this.fallbackModel,
             messages: params.messages,
-            response_format: { type: 'json_object' },
             temperature: params.temperature ?? 0.1,
-            max_completion_tokens: params.maxTokens ?? 4000
+            max_completion_tokens: maxTokens
           });
 
           const text = fallbackCompletion.choices[0]?.message?.content;
           if (text) {
-            return { content: text, model: this.fallbackModel };
+            return { content: this.sanitizeJsonContent(text), model: this.fallbackModel };
           }
         } catch (fallbackErr: any) {
+          if (fallbackErr?.status === 429) {
+            console.warn('Fallback also rate limited. Waiting 3s before fast retry...');
+            await new Promise((r) => setTimeout(r, 3000));
+            try {
+              const retryCompletion = await client.chat.completions.create({
+                model: this.fallbackModel,
+                messages: params.messages,
+                temperature: params.temperature ?? 0.1,
+                max_completion_tokens: maxTokens
+              });
+              const text2 = retryCompletion.choices[0]?.message?.content;
+              if (text2) {
+                return { content: this.sanitizeJsonContent(text2), model: this.fallbackModel };
+              }
+            } catch (rErr) {
+              console.error('Fallback retry failed:', rErr);
+            }
+          }
           console.error('Fallback model also encountered error:', fallbackErr);
         }
       }

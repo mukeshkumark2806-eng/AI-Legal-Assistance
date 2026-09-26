@@ -1,4 +1,4 @@
-import { groqService, GroqServiceError } from './groqService.ts';
+import { groqService, GroqServiceError, safeParseJson } from './groqService.ts';
 import type { InputSection } from '../schemas/legalAnalysisSchema.ts';
 import {
   FullComparisonResultSchema,
@@ -353,13 +353,13 @@ Ensure all changed provisions have exact citations and accurate classifications.
       { role: 'user', content: userPrompt }
     ],
     temperature: 0.1,
-    maxTokens: 8192
+    maxTokens: 4096
   });
 
   // 4. Parse & Validate
   let parsedJson: any;
   try {
-    parsedJson = JSON.parse(completion.content);
+    parsedJson = safeParseJson(completion.content);
   } catch (err) {
     console.error('Failed to parse Groq comparison JSON:', completion.content);
     throw new GroqServiceError('AI service returned an unparseable response for document comparison.', 502, 'INVALID_JSON');

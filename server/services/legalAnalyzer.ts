@@ -1,4 +1,4 @@
-import { groqService, GroqServiceError } from './groqService.ts';
+import { groqService, GroqServiceError, safeParseJson } from './groqService.ts';
 import { chunkDocumentSections } from '../utils/chunker.ts';
 import {
   FullLegalAnalysisSchema,
@@ -349,13 +349,13 @@ Ensure explanations are concise, crisp, and plain-English (1-2 sentences per fie
       { role: 'user', content: userPrompt }
     ],
     temperature: 0.1,
-    maxTokens: 8192
+    maxTokens: 4096
   });
 
   // 4. Parse & Validate JSON with Zod Schema
   let parsedJson: any;
   try {
-    parsedJson = JSON.parse(completionResult.content);
+    parsedJson = safeParseJson(completionResult.content);
   } catch (parseErr) {
     console.error('Failed to parse JSON response from Groq:', completionResult.content);
     throw new GroqServiceError('AI service returned an invalid JSON response.', 502, 'INVALID_JSON');
