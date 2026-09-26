@@ -135,6 +135,26 @@ class GroqClientManager {
 
       return { content: this.sanitizeJsonContent(text), model: primaryModel };
     } catch (err: any) {
+      // If primary model hit 429 (rate limit), wait 3s and retry primary once before falling back
+      if (err?.status === 429) {
+        console.warn(`Primary model ${primaryModel} rate limited. Waiting 3s before retry...`);
+        await new Promise((r) => setTimeout(r, 3000));
+        try {
+          const retryCompletion = await client.chat.completions.create({
+            model: primaryModel,
+            messages: params.messages,
+            temperature: params.temperature ?? 0.1,
+            max_completion_tokens: maxTokens
+          });
+          const text = retryCompletion.choices[0]?.message?.content;
+          if (text) {
+            return { content: this.sanitizeJsonContent(text), model: primaryModel };
+          }
+        } catch (retryErr: any) {
+          console.warn(`Primary model retry failed (${retryErr?.message || retryErr?.status}). Proceeding to fallback...`);
+        }
+      }
+
       // If primary model failed due to 404, 429, 400, or network error, immediately try fallback model
       if (primaryModel !== this.fallbackModel) {
         console.warn(`Primary model ${primaryModel} failed (${err?.message || err?.status}). Trying fallback ${this.fallbackModel}...`);
