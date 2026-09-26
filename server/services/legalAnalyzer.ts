@@ -349,7 +349,7 @@ Ensure explanations are concise, crisp, and plain-English (1-2 sentences per fie
       { role: 'user', content: userPrompt }
     ],
     temperature: 0.1,
-    maxTokens: 4096
+    maxTokens: 2500
   });
 
   // 4. Parse & Validate JSON with Zod Schema
