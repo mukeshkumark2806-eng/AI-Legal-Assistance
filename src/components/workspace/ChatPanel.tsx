@@ -279,7 +279,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({ document: doc, onJumpToCla
               )}
 
               <div
-                className="text-[10px] mt-1.5 text-right font-mono text-slate-400"
+                className="text-xs mt-1.5 text-right font-mono text-slate-500"
               >
                 {msg.timestamp}
               </div>

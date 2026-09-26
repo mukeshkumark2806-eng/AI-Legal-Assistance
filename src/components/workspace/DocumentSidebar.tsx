@@ -58,7 +58,7 @@ export const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
       <div className="p-4 border-b border-slate-100 bg-slate-50/50">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-1.5">
-            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+            <span className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
               Active Document
             </span>
             {isUploadedDoc ? (
@@ -85,9 +85,9 @@ export const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
         </h3>
 
         {/* Quick Stats Grid */}
-        <div className="grid grid-cols-2 gap-2 mt-3 text-[11px]">
+        <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
           <div className="p-2 rounded-lg bg-white border border-slate-200/80">
-            <span className="text-slate-400 block text-[10px]">
+            <span className="text-slate-600 block text-xs">
               {isUploadedDoc ? 'Ingestion Status' : 'Risk Assessment'}
             </span>
             <div className="flex items-center gap-1.5 font-semibold mt-0.5">
@@ -105,7 +105,7 @@ export const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
             </div>
           </div>
           <div className="p-2 rounded-lg bg-white border border-slate-200/80">
-            <span className="text-slate-400 block text-[10px]">
+            <span className="text-slate-600 block text-xs">
               {isUploadedDoc ? 'Sections Detected' : 'Clauses Extracted'}
             </span>
             <div className="flex items-center gap-1.5 font-semibold text-slate-800 mt-0.5">
@@ -161,7 +161,7 @@ export const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
       {/* Tab 1: Table of Contents (Outline) */}
       {activeTab === 'toc' && (
         <div id="sidebar-panel-toc" role="tabpanel" aria-labelledby="sidebar-tab-toc" tabIndex={0} className="flex-1 overflow-y-auto p-3 space-y-1 focus:outline-none">
-          <div className="px-2 py-1 text-[11px] font-medium text-slate-400 uppercase tracking-wider flex items-center justify-between">
+          <div className="px-2 py-1 text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center justify-between">
             <span>Detected Sections</span>
             <span>Jump</span>
           </div>
@@ -176,7 +176,7 @@ export const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
               >
                 <div className="flex items-start gap-2 min-w-0 pr-2">
                   {section.sectionNumber && (
-                    <span className="font-mono text-[11px] font-semibold text-slate-400 group-hover:text-indigo-600 shrink-0 mt-0.5">
+                    <span className="font-mono text-xs font-semibold text-slate-600 group-hover:text-indigo-600 shrink-0 mt-0.5">
                       {section.sectionNumber}
                     </span>
                   )}
@@ -185,7 +185,7 @@ export const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
                   </span>
                 </div>
                 {section.pageNumber !== undefined && (
-                  <span className="text-[10px] font-mono text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded shrink-0">
+                  <span className="text-xs font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded shrink-0">
                     p.{section.pageNumber}
                   </span>
                 )}
@@ -258,7 +258,7 @@ export const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1">
-                        <span className="font-mono text-[10px] text-slate-400">
+                        <span className="font-mono text-xs text-slate-600">
                           Sec {clause.sectionNumber}
                         </span>
                         <CategoryBadge category={clause.category} size="sm" />

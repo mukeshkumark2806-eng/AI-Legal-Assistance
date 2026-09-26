@@ -348,7 +348,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
                     ) : (
                       <Circle className="w-3.5 h-3.5 text-slate-300 shrink-0" />
                     )}
-                    <span className={`text-[11px] ${isComplete ? 'text-slate-700 font-medium' : isCurrent ? 'text-indigo-700 font-semibold' : 'text-slate-400'}`}>
+                    <span className={`text-xs ${isComplete ? 'text-slate-700 font-medium' : isCurrent ? 'text-indigo-700 font-semibold' : 'text-slate-600'}`}>
                       {step.label}
                     </span>
                   </div>
@@ -361,22 +361,22 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
           {extractedDoc && (
             <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div>
-                <span className="text-[10px] text-slate-400 uppercase font-semibold block">Total Pages</span>
+                <span className="text-xs text-slate-600 uppercase font-semibold block">Total Pages</span>
                 <span className="font-semibold text-slate-900 mt-0.5 block">{extractedDoc.totalPages} Pages</span>
               </div>
               <div>
-                <span className="text-[10px] text-slate-400 uppercase font-semibold block">Detected Sections</span>
+                <span className="text-xs text-slate-600 uppercase font-semibold block">Detected Sections</span>
                 <span className="font-semibold text-indigo-700 mt-0.5 block">{extractedDoc.sections.length} Sections</span>
               </div>
               <div>
-                <span className="text-[10px] text-slate-400 uppercase font-semibold block">Extracted Words</span>
+                <span className="text-xs text-slate-600 uppercase font-semibold block">Extracted Words</span>
                 <span className="font-semibold text-slate-900 mt-0.5 block">
                   {extractedDoc.extractionStats?.totalWords.toLocaleString() || '0'} words
                 </span>
               </div>
               <div>
-                <span className="text-[10px] text-slate-400 uppercase font-semibold block">AI Intelligence</span>
-                <span className={`mt-0.5 block font-semibold ${analyzedDoc ? 'text-indigo-700' : 'text-slate-500'}`}>
+                <span className="text-xs text-slate-600 uppercase font-semibold block">AI Intelligence</span>
+                <span className={`mt-0.5 block font-semibold ${analyzedDoc ? 'text-indigo-700' : 'text-slate-600'}`}>
                   {analyzedDoc ? `${analyzedDoc.clauses.length} Clauses Classified` : isAnalyzingAi ? 'Analyzing...' : 'Ready'}
                 </span>
               </div>
@@ -491,7 +491,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
             <FileText className="w-3.5 h-3.5 text-slate-400" />
             Or explore verified demo agreements:
           </span>
-          <span className="text-xs text-slate-400 font-mono">Demo Document</span>
+          <span className="text-xs text-slate-600 font-mono">Demo Document</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -550,7 +550,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
           </button>
         </div>
 
-        <div className="mt-3 flex items-center gap-1.5 text-[11px] text-slate-400 justify-center">
+        <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-600 justify-center">
           <Info className="w-3 h-3" />
           <span>Real uploaded documents are analyzed dynamically using server-side document intelligence.</span>
         </div>

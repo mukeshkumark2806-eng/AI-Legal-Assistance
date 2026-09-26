@@ -224,7 +224,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                     </h3>
 
                     {section.pageNumber !== undefined && (
-                      <span className="text-[10px] font-mono font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                      <span className="text-xs font-mono font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
                         Page {section.pageNumber}
                       </span>
                     )}

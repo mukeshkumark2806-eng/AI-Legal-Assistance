@@ -1188,7 +1188,7 @@ export const ComparisonPanel: React.FC = () => {
                             {change.oldText ? (
                               change.oldText
                             ) : (
-                              <span className="text-slate-400 italic font-sans text-xs">
+                              <span className="text-slate-600 italic font-sans text-xs">
                                 [Clause did not exist in baseline agreement]
                               </span>
                             )}
@@ -1196,7 +1196,7 @@ export const ComparisonPanel: React.FC = () => {
                         </div>
 
                         {change.oldText && (
-                          <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between font-sans text-[11px] text-slate-400">
+                          <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between font-sans text-xs text-slate-600">
                             <span>{change.pageNumberA ? `Page ${change.pageNumberA}` : 'Baseline Text'}</span>
                             <button
                               type="button"
@@ -1240,7 +1240,7 @@ export const ComparisonPanel: React.FC = () => {
                             {change.newText ? (
                               change.newText
                             ) : (
-                              <span className="text-slate-400 italic font-sans text-xs">
+                              <span className="text-slate-600 italic font-sans text-xs">
                                 [Clause was completely removed in revised draft]
                               </span>
                             )}
@@ -1248,7 +1248,7 @@ export const ComparisonPanel: React.FC = () => {
                         </div>
 
                         {change.newText && (
-                          <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between font-sans text-[11px] text-slate-400">
+                          <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between font-sans text-xs text-slate-600">
                             <span>{change.pageNumberB ? `Page ${change.pageNumberB}` : 'Revised Text'}</span>
                             <button
                               type="button"
@@ -1352,15 +1352,15 @@ export const ComparisonPanel: React.FC = () => {
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
                         <div className="p-3 rounded-lg bg-slate-50 border border-slate-200/60">
-                          <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Baseline Obligation</span>
+                          <span className="text-xs uppercase font-bold text-slate-600 block mb-0.5">Baseline Obligation</span>
                           <p className="text-slate-700">{ob.oldObligation || '[None defined]'}</p>
                         </div>
                         <div className="p-3 rounded-lg bg-indigo-50/50 border border-indigo-100">
-                          <span className="text-[10px] uppercase font-bold text-indigo-600 block mb-0.5">Revised Obligation</span>
+                          <span className="text-xs uppercase font-bold text-indigo-700 block mb-0.5">Revised Obligation</span>
                           <p className="text-indigo-950">{ob.newObligation || '[Removed]'}</p>
                         </div>
                       </div>
-                      <p className="text-xs text-slate-500 pt-1">
+                      <p className="text-xs text-slate-600 pt-1">
                         <strong>Impact:</strong> {ob.impact}
                       </p>
                     </div>
@@ -1381,14 +1381,14 @@ export const ComparisonPanel: React.FC = () => {
                       <div key={idx} className="bg-white border border-slate-200 rounded-xl p-4 text-xs space-y-2">
                         <div className="flex items-center justify-between">
                           <h5 className="font-bold text-slate-900">{dl.title}</h5>
-                          <span className="font-mono text-slate-400">{dl.clauseRef}</span>
+                          <span className="font-mono text-slate-600">{dl.clauseRef}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-slate-600">
-                          <span className="line-through text-slate-400">{dl.oldDeadline || 'N/A'}</span>
+                        <div className="flex items-center gap-2 text-slate-700">
+                          <span className="line-through text-slate-500">{dl.oldDeadline || 'N/A'}</span>
                           <ArrowRight className="w-3 h-3 text-indigo-600 shrink-0" />
                           <span className="font-bold text-indigo-700">{dl.newDeadline || 'Deleted'}</span>
                         </div>
-                        <p className="text-slate-500">{dl.impact}</p>
+                        <p className="text-slate-600">{dl.impact}</p>
                       </div>
                     ))}
                   </div>
@@ -1405,14 +1405,14 @@ export const ComparisonPanel: React.FC = () => {
                       <div key={idx} className="bg-white border border-slate-200 rounded-xl p-4 text-xs space-y-2">
                         <div className="flex items-center justify-between">
                           <h5 className="font-bold text-slate-900">{fin.item}</h5>
-                          <span className="font-mono text-slate-400">{fin.clauseRef}</span>
+                          <span className="font-mono text-slate-600">{fin.clauseRef}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-slate-600">
-                          <span className="line-through text-slate-400">{fin.oldValue || 'None'}</span>
+                        <div className="flex items-center gap-2 text-slate-700">
+                          <span className="line-through text-slate-500">{fin.oldValue || 'None'}</span>
                           <ArrowRight className="w-3 h-3 text-emerald-600 shrink-0" />
                           <span className="font-bold text-emerald-700">{fin.newValue || 'Deleted'}</span>
                         </div>
-                        <p className="text-slate-500">{fin.impact}</p>
+                        <p className="text-slate-600">{fin.impact}</p>
                       </div>
                     ))}
                   </div>

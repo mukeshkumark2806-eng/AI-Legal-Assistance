@@ -105,7 +105,7 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({
                 <div className="flex flex-wrap items-center justify-between gap-1.5 mb-1">
                   <span
                     className={`text-xs font-semibold leading-snug cursor-pointer ${
-                      item.completed ? 'line-through text-slate-400' : 'text-slate-900'
+                      item.completed ? 'line-through text-slate-500' : 'text-slate-900'
                     }`}
                     onClick={() => toggleCheck(item.id)}
                   >

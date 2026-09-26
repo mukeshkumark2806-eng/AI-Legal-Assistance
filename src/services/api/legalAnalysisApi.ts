@@ -37,6 +37,7 @@ export class ApiError extends Error {
 
 // In-memory frontend cache for current session to prevent redundant API calls
 const sessionAnalysisCache = new Map<string, any>();
+const sessionQaCache = new Map<string, GroundedQuestionResult>();
 
 /**
  * Health check to verify backend server is running and Groq key is configured.
@@ -217,6 +218,11 @@ export async function askDocumentQuestion(
   question: string,
   doc: LegalDocument
 ): Promise<GroundedQuestionResult> {
+  const qaCacheKey = `${doc.name}-${question.trim().toLowerCase()}`;
+  if (sessionQaCache.has(qaCacheKey)) {
+    return sessionQaCache.get(qaCacheKey)!;
+  }
+
   const inputSections = doc.sections.map((s) => ({
     id: s.id,
     sectionNumber: s.sectionNumber || '',
@@ -257,12 +263,14 @@ export async function askDocumentQuestion(
     }
 
     const data = await res.json();
-    return {
+    const result: GroundedQuestionResult = {
       answer: data.answer,
       isFoundInDocument: Boolean(data.isFoundInDocument),
       citations: Array.isArray(data.citations) ? data.citations : [],
       disclaimer: data.disclaimer || 'AI-generated informational assistance. This does not replace professional legal advice.'
     };
+    sessionQaCache.set(qaCacheKey, result);
+    return result;
   } catch (err: any) {
     if (err instanceof ApiError) throw err;
     throw new ApiError(

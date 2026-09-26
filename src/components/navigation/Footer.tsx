@@ -144,7 +144,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenCompliance }) 
           <p className="text-[11px] text-slate-500 leading-relaxed text-center sm:text-left max-w-2xl">
             <strong>Important Legal Disclaimer:</strong> LegalLens provides informational assistance based on the uploaded document and does not replace professional legal advice. LegalLens is not a law firm, does not provide legal representation, and the outputs of this software should be reviewed by licensed legal counsel before executing binding contracts.
           </p>
-          <span className="text-[11px] text-slate-400 shrink-0 font-mono">
+          <span className="text-xs text-slate-500 shrink-0 font-mono">
             © {new Date().getFullYear()} LegalLens. All rights reserved.
           </span>
         </div>

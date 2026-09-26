@@ -209,14 +209,14 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
                   <p className="text-xs text-slate-500 mt-0.5 truncate">
                     Counterparty: {doc.counterparty}
                   </p>
-                  <div className="flex items-center gap-3 text-[11px] text-slate-400 mt-2">
+                  <div className="flex items-center gap-3 text-xs text-slate-600 mt-2">
                     <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> {doc.date}
+                      <Clock className="w-3 h-3 text-slate-500" /> {doc.date}
                     </span>
-                    <span>•</span>
+                    <span aria-hidden="true">•</span>
                     <span>{doc.size}</span>
-                    <span>•</span>
-                    <span className="text-indigo-600 font-medium">
+                    <span aria-hidden="true">•</span>
+                    <span className="text-indigo-700 font-medium">
                       {doc.clausesCount} Clauses Extracted
                     </span>
                   </div>

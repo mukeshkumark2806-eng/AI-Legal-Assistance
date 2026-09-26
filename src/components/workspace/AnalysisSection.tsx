@@ -117,13 +117,13 @@ export const AnalysisSection: React.FC<AnalysisSectionProps> = ({
               >
                 <div className="flex items-center gap-2 truncate pr-2">
                   {sec.sectionNumber && (
-                    <span className="font-mono text-[10px] font-semibold text-slate-400 group-hover:text-indigo-600 shrink-0">
+                    <span className="font-mono text-xs font-semibold text-slate-600 group-hover:text-indigo-600 shrink-0">
                       {sec.sectionNumber}
                     </span>
                   )}
                   <span className="font-medium text-slate-800 truncate">{sec.title}</span>
                 </div>
-                <div className="flex items-center gap-2 text-[10px] text-slate-400 shrink-0">
+                <div className="flex items-center gap-2 text-xs text-slate-600 shrink-0">
                   <span>{sec.paragraphs.length} ¶</span>
                   {sec.pageNumber !== undefined && (
                     <span className="font-mono bg-white border border-slate-200 px-1 py-0.2 rounded">
