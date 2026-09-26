@@ -1,7 +1,7 @@
 import { Router, type Request, type Response } from 'express';
-import { AnalyzeDocumentRequestSchema } from '../schemas/legalAnalysisSchema';
-import { analyzeDocumentWithGroq } from '../services/legalAnalyzer';
-import { GroqServiceError } from '../services/groqService';
+import { AnalyzeDocumentRequestSchema } from '../schemas/legalAnalysisSchema.ts';
+import { analyzeDocumentWithGroq } from '../services/legalAnalyzer.ts';
+import { GroqServiceError } from '../services/groqService.ts';
 
 export const analyzeRouter = Router();
 

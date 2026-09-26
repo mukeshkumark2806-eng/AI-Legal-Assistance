@@ -1,4 +1,4 @@
-import type { InputSection } from '../schemas/legalAnalysisSchema';
+import type { InputSection } from '../schemas/legalAnalysisSchema.ts';
 
 export interface DocumentChunk {
   chunkIndex: number;

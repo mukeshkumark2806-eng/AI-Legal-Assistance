@@ -20,8 +20,29 @@ class GroqClientManager {
   private defaultModel = 'llama-3.3-70b-versatile';
   private fallbackModel = 'llama3-8b-8192';
 
+  // Known valid Groq model IDs — prevents invalid GROQ_MODEL env vars from crashing the server
+  private validModels = new Set([
+    'llama-3.3-70b-versatile',
+    'llama-3.1-70b-versatile',
+    'llama-3.1-8b-instant',
+    'llama3-70b-8192',
+    'llama3-8b-8192',
+    'llama-3.3-70b-specdec',
+    'mixtral-8x7b-32768',
+    'gemma2-9b-it',
+    'openai/gpt-oss-120b',
+    'openai/gpt-oss-20b',
+  ]);
+
   public getModel(): string {
-    return process.env.GROQ_MODEL?.trim() || this.defaultModel;
+    const envModel = process.env.GROQ_MODEL?.trim();
+    if (envModel && this.validModels.has(envModel)) {
+      return envModel;
+    }
+    if (envModel) {
+      console.warn(`[GroqService] GROQ_MODEL env var "${envModel}" is not in the known-valid list. Falling back to default: ${this.defaultModel}`);
+    }
+    return this.defaultModel;
   }
 
   public getClient(): Groq {

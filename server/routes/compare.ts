@@ -1,7 +1,7 @@
 import { Router, type Request, type Response } from 'express';
-import { CompareDocumentsRequestSchema } from '../schemas/documentComparisonSchema';
-import { compareDocumentsWithGroq } from '../services/comparisonService';
-import { GroqServiceError } from '../services/groqService';
+import { CompareDocumentsRequestSchema } from '../schemas/documentComparisonSchema.ts';
+import { compareDocumentsWithGroq } from '../services/comparisonService.ts';
+import { GroqServiceError } from '../services/groqService.ts';
 
 export const compareRouter = Router();
 

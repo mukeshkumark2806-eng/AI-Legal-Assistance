@@ -1,15 +1,20 @@
-import type { Request, Response } from 'express';
-import { groqService } from '../server/services/groqService';
+import type { IncomingMessage, ServerResponse } from 'http';
 
-export default function handler(_req: Request, res: Response) {
-  const hasApiKey = Boolean(process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim().length > 0);
-  const configuredModel = groqService.getModel();
+export default function handler(req: IncomingMessage, res: any) {
+  // Support both Express/Vercel (res.status.json) and native Node (res.writeHead/end)
+  if (typeof res.status === 'function' && typeof res.json === 'function') {
+    return res.status(200).json({
+      status: 'ok',
+      service: 'LegalLens AI Backend'
+    });
+  }
 
-  return res.status(200).json({
-    status: 'ok',
-    service: 'LegalLens AI Backend',
-    hasApiKey,
-    model: configuredModel,
-    version: 'Build 3 GenAI'
-  });
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'application/json');
+  res.end(
+    JSON.stringify({
+      status: 'ok',
+      service: 'LegalLens AI Backend'
+    })
+  );
 }

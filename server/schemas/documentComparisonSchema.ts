@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { InputSectionSchema } from './legalAnalysisSchema';
+import { InputSectionSchema } from './legalAnalysisSchema.ts';
 
 // Enums with case-tolerant preprocessing
 export const ComparisonChangeTypeEnum = z.preprocess((val) => {

@@ -1,11 +1,11 @@
-import { groqService, GroqServiceError } from './groqService';
-import { chunkDocumentSections } from '../utils/chunker';
+import { groqService, GroqServiceError } from './groqService.ts';
+import { chunkDocumentSections } from '../utils/chunker.ts';
 import {
   FullLegalAnalysisSchema,
   type FullLegalAnalysis,
   type AnalyzeDocumentRequest,
   type InputSection
-} from '../schemas/legalAnalysisSchema';
+} from '../schemas/legalAnalysisSchema.ts';
 
 const LEGAL_ANALYZER_SYSTEM_PROMPT = `You are LegalLens AI, an expert legal-information assistant. Your function is to analyze uploaded legal contracts and instruments to help non-lawyer users understand what they are reading.
 

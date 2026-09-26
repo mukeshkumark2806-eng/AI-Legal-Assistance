@@ -1,11 +1,11 @@
-import { groqService, GroqServiceError } from './groqService';
+import { groqService, GroqServiceError } from './groqService.ts';
 import {
   DocumentQuestionResponseSchema,
   type DocumentQuestionRequest,
   type DocumentQuestionResponse,
   type InputSection,
   type Citation
-} from '../schemas/legalAnalysisSchema';
+} from '../schemas/legalAnalysisSchema.ts';
 
 const QA_SYSTEM_PROMPT = `You are LegalLens Document Assistant. Your job is to answer user questions strictly and solely based on the provided document excerpts.
 

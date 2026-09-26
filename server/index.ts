@@ -1,10 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { analyzeRouter } from './routes/analyze';
-import { questionRouter } from './routes/question';
-import { healthRouter } from './routes/health';
-import { compareRouter } from './routes/compare';
+import { analyzeRouter } from './routes/analyze.ts';
+import { questionRouter } from './routes/question.ts';
+import { healthRouter } from './routes/health.ts';
+import { compareRouter } from './routes/compare.ts';
 
 dotenv.config();
 

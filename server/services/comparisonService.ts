@@ -1,10 +1,10 @@
-import { groqService, GroqServiceError } from './groqService';
-import type { InputSection } from '../schemas/legalAnalysisSchema';
+import { groqService, GroqServiceError } from './groqService.ts';
+import type { InputSection } from '../schemas/legalAnalysisSchema.ts';
 import {
   FullComparisonResultSchema,
   type FullComparisonResult,
   type CompareDocumentsRequest
-} from '../schemas/documentComparisonSchema';
+} from '../schemas/documentComparisonSchema.ts';
 
 export interface AlignedSectionPair {
   status: 'MATCHED' | 'ADDED_IN_B' | 'REMOVED_FROM_A';
