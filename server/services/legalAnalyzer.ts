@@ -379,6 +379,21 @@ Ensure explanations are concise, crisp, and plain-English (1-2 sentences per fie
     });
   }
 
+  const clausesList = Array.isArray(parsedJson.clauses) ? parsedJson.clauses : [];
+
+  if (!Array.isArray(parsedJson.keyObligations) || parsedJson.keyObligations.length === 0) {
+    const candidateClauses = clausesList.filter((c: any) => c.category === 'Obligation' || c.category === 'Payment' || c.importance === 'Critical' || c.importance === 'High');
+    const toUse = candidateClauses.length > 0 ? candidateClauses : clausesList.slice(0, 3);
+    parsedJson.keyObligations = toUse.map((c: any, idx: number) => ({
+      id: `ob-${idx + 1}`,
+      party: 'Client',
+      description: c.plainEnglish || c.title || 'Comply with clause requirements',
+      deadline: null,
+      clauseRef: c.sourceReference || `Section ${c.sectionNumber || idx + 1}`,
+      importance: c.importance || 'High'
+    }));
+  }
+
   if (Array.isArray(parsedJson.keyObligations)) {
     parsedJson.keyObligations = parsedJson.keyObligations.map((o: any, idx: number) => ({
       ...o,
@@ -395,12 +410,41 @@ Ensure explanations are concise, crisp, and plain-English (1-2 sentences per fie
     }));
   }
 
+  if (!Array.isArray(parsedJson.financialCommitments) || parsedJson.financialCommitments.length === 0) {
+    const payClauses = clausesList.filter((c: any) => c.category === 'Payment' || (c.title && c.title.toLowerCase().includes('payment')) || (c.plainEnglish && c.plainEnglish.includes('$')));
+    if (payClauses.length > 0) {
+      parsedJson.financialCommitments = payClauses.map((c: any, idx: number) => ({
+        id: `fin-${idx + 1}`,
+        item: c.title || 'Financial Obligation',
+        amount: 'Refer to contract text',
+        schedule: 'Per contract schedule',
+        clauseRef: c.sourceReference || `Section ${c.sectionNumber || idx + 1}`,
+        penaltyTerms: null,
+        importance: c.importance || 'High'
+      }));
+    }
+  }
+
   if (Array.isArray(parsedJson.financialCommitments)) {
     parsedJson.financialCommitments = parsedJson.financialCommitments.map((f: any, idx: number) => ({
       ...f,
       id: f.id || `fin-${idx + 1}`,
       clauseRef: normalizeSourceRef(f.clauseRef, sections, `${f.item} ${f.amount} ${f.schedule}`)
     }));
+  }
+
+  if (!Array.isArray(parsedJson.potentialConcerns) || parsedJson.potentialConcerns.length === 0) {
+    const concernClauses = clausesList.filter((c: any) => c.concern && c.concern.length > 5);
+    if (concernClauses.length > 0) {
+      parsedJson.potentialConcerns = concernClauses.slice(0, 3).map((c: any, idx: number) => ({
+        id: `concern-${idx + 1}`,
+        title: c.title || 'Potential Risk',
+        severity: c.importance || 'Moderate',
+        clauseRef: c.sourceReference || `Section ${c.sectionNumber || idx + 1}`,
+        description: c.concern,
+        mitigationAdvice: 'Seek legal clarification or negotiate adjusted terms.'
+      }));
+    }
   }
 
   if (Array.isArray(parsedJson.potentialConcerns)) {
@@ -411,11 +455,32 @@ Ensure explanations are concise, crisp, and plain-English (1-2 sentences per fie
     }));
   }
 
+  if (!Array.isArray(parsedJson.actionChecklist) || parsedJson.actionChecklist.length === 0) {
+    parsedJson.actionChecklist = clausesList.slice(0, 3).map((c: any, idx: number) => ({
+      id: `act-${idx + 1}`,
+      task: `Review ${c.title || 'section terms'} with team and confirm compliance`,
+      clauseRef: c.sourceReference || `Section ${c.sectionNumber || idx + 1}`,
+      priority: c.importance === 'Critical' ? 'Critical' : 'Recommended',
+      completed: false,
+      notes: 'Confirm obligations and timeline before signature.'
+    }));
+  }
+
   if (Array.isArray(parsedJson.actionChecklist)) {
     parsedJson.actionChecklist = parsedJson.actionChecklist.map((a: any, idx: number) => ({
       ...a,
       id: a.id || `act-${idx + 1}`,
       clauseRef: normalizeSourceRef(a.clauseRef, sections, `${a.task} ${a.notes || ''}`)
+    }));
+  }
+
+  if (!Array.isArray(parsedJson.lawyerQuestions) || parsedJson.lawyerQuestions.length === 0) {
+    parsedJson.lawyerQuestions = clausesList.slice(0, 3).map((c: any, idx: number) => ({
+      id: `lq-${idx + 1}`,
+      question: `Should we negotiate the scope or terms specified in ${c.sourceReference || 'this section'}?`,
+      context: c.plainEnglish || c.title || 'Review of contractual terms',
+      clauseRef: c.sourceReference || `Section ${c.sectionNumber || idx + 1}`,
+      reason: 'To ensure terms do not create disproportionate liability or operational friction.'
     }));
   }
 
