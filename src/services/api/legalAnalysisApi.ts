@@ -424,6 +424,6 @@ function applyAnalysisToDocument(doc: LegalDocument, rawAnalysis: any): LegalDoc
     checklist: checklist.length > 0 ? checklist : doc.checklist,
     lawyerQuestions: lawyerQuestions.length > 0 ? lawyerQuestions : doc.lawyerQuestions,
     isAiAnalyzed: true,
-    aiModelUsed: 'Groq (openai/gpt-oss-120b)'
+    aiModelUsed: 'Groq (llama-3.3-70b-versatile)'
   };
 }

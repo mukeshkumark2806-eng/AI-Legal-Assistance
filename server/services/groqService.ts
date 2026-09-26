@@ -17,8 +17,8 @@ export class GroqServiceError extends Error {
 
 class GroqClientManager {
   private client: Groq | null = null;
-  private defaultModel = 'openai/gpt-oss-120b';
-  private fallbackModel = 'openai/gpt-oss-20b';
+  private defaultModel = 'llama-3.3-70b-versatile';
+  private fallbackModel = 'llama3-8b-8192';
 
   public getModel(): string {
     return process.env.GROQ_MODEL?.trim() || this.defaultModel;
