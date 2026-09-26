@@ -232,19 +232,9 @@ var GroqClientManager = class {
   fallbackModel = "openai/gpt-oss-120b";
   // Known valid Groq model IDs — prevents invalid GROQ_MODEL env vars from crashing the server
   validModels = /* @__PURE__ */ new Set([
-    "openai/gpt-oss-120b",
     "openai/gpt-oss-20b",
-    "openai/gpt-oss-safeguard-20b",
-    "qwen/qwen3.8-27b",
-    "allam-2-7b",
-    "llama-3.3-70b-versatile",
-    "llama-3.1-70b-versatile",
-    "llama-3.1-8b-instant",
-    "llama3-70b-8192",
-    "llama3-8b-8192",
-    "mixtral-8x7b-32768",
-    "gemma2-9b-it",
-    "deepseek-r1-distill-llama-70b"
+    "openai/gpt-oss-120b",
+    "openai/gpt-oss-safeguard-20b"
   ]);
   getModel() {
     const envModel = process.env.GROQ_MODEL?.trim();
@@ -252,7 +242,7 @@ var GroqClientManager = class {
       return envModel;
     }
     if (envModel) {
-      console.warn(`[GroqService] GROQ_MODEL env var "${envModel}" is invalid. Falling back to default: ${this.defaultModel}`);
+      console.warn(`[GroqService] GROQ_MODEL env var "${envModel}" is invalid or obsolete. Falling back to default: ${this.defaultModel}`);
     }
     return this.defaultModel;
   }
@@ -420,9 +410,10 @@ function retrieveRelevantSections(question, sections, topK = 4) {
   }
   const scoredSections = sections.map((section) => {
     let score = 0;
-    const titleLower = section.title.toLowerCase();
+    const titleLower = (section.title || "").toLowerCase();
     const secNumLower = (section.sectionNumber || "").toLowerCase();
-    const bodyLower = section.paragraphs.join(" ").toLowerCase();
+    const paragraphs = section.paragraphs && section.paragraphs.length > 0 ? section.paragraphs : section.text ? [section.text] : [];
+    const bodyLower = paragraphs.join(" ").toLowerCase();
     if (secNumLower && normalizedQuestion.includes(secNumLower)) {
       score += 50;
     }
@@ -437,6 +428,9 @@ function retrieveRelevantSections(question, sections, topK = 4) {
     });
     return { section, score };
   });
+  if (sections.length <= topK) {
+    return sections;
+  }
   scoredSections.sort((a, b) => b.score - a.score);
   const topSections = scoredSections.filter((s) => s.score > 0).slice(0, topK).map((s) => s.section);
   if (topSections.length === 0) {
@@ -523,7 +517,7 @@ Analyze only the provided excerpts above. The supplied section numbers and title
   return validated.data;
 }
 
-// server/api/document-question.ts
+// server/handlers/document-question.ts
 async function getRequestBody(req) {
   if (req.body !== void 0 && req.body !== null) {
     if (typeof req.body === "string") {

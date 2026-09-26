@@ -7,7 +7,8 @@
     "dev": "concurrently -k -p \"[{name}]\" -n \"CLIENT,SERVER\" -c \"cyan.bold,magenta.bold\" \"vite\" \"tsx server/index.ts\"",
     "client": "vite",
     "server": "tsx server/index.ts",
-    "build": "tsc -b && vite build",
+    "build:api": "esbuild server/handlers/analyze-document.ts --bundle --platform=node --format=esm --packages=external --outfile=api/analyze-document.js && esbuild server/handlers/document-question.ts --bundle --platform=node --format=esm --packages=external --outfile=api/document-question.js && esbuild server/handlers/compare-documents.ts --bundle --platform=node --format=esm --packages=external --outfile=api/compare-documents.js",
+    "build": "tsc -b && npm run build:api && vite build",
     "preview": "vite preview",
     "test": "tsx --test tests/build5a-section-accuracy.test.mjs tests/build5b-clause-mapping.test.mjs tests/build3-genai.test.mjs tests/e2e-file-analysis.test.mjs tests/build4-comparison.test.mjs tests/build6-footer-navigation.test.mjs"
   },

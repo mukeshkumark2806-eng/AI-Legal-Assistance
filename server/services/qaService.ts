@@ -75,9 +75,12 @@ function retrieveRelevantSections(question: string, sections: InputSection[], to
 
   const scoredSections = sections.map((section) => {
     let score = 0;
-    const titleLower = section.title.toLowerCase();
+    const titleLower = (section.title || '').toLowerCase();
     const secNumLower = (section.sectionNumber || '').toLowerCase();
-    const bodyLower = section.paragraphs.join(' ').toLowerCase();
+    const paragraphs = (section.paragraphs && section.paragraphs.length > 0)
+      ? section.paragraphs
+      : ((section as any).text ? [(section as any).text] : []);
+    const bodyLower = paragraphs.join(' ').toLowerCase();
 
     // High boost if section number is mentioned directly (e.g. "Section 4" or "4.1")
     if (secNumLower && normalizedQuestion.includes(secNumLower)) {
@@ -98,6 +101,11 @@ function retrieveRelevantSections(question: string, sections: InputSection[], to
 
     return { section, score };
   });
+
+  // If document has few sections, provide all of them to guarantee context
+  if (sections.length <= topK) {
+    return sections;
+  }
 
   scoredSections.sort((a, b) => b.score - a.score);
 
