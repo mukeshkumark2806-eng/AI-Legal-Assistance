@@ -73,6 +73,12 @@ export const App: React.FC = () => {
           <Workspace
             document={activeDocument}
             onUploadNewClick={() => setIsUploadModalOpen(true)}
+            onUpdateDocument={(updated) => {
+              setActiveDocument(updated);
+              setUploadedDocuments((prev) =>
+                prev.map((d) => (d.id === updated.id ? updated : d))
+              );
+            }}
           />
         )}
 

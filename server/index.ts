@@ -23,7 +23,13 @@ app.use((req, _res, next) => {
   next();
 });
 
-// Mount routes
+// Mount routes at root level (Vercel rewrites strip '/api' prefix before reaching this handler)
+app.use(healthRouter);
+app.use(analyzeRouter);
+app.use(questionRouter);
+app.use(compareRouter);
+
+// Also mount with '/api' prefix for local development (where Express serves directly)
 app.use('/api', healthRouter);
 app.use('/api', analyzeRouter);
 app.use('/api', questionRouter);
@@ -45,7 +51,12 @@ app.get('/', (_req, res) => {
 });
 
 // Start server
-if (process.env.NODE_ENV !== 'test' && process.env.npm_lifecycle_event !== 'test' && !process.env.NODE_TEST_CONTEXT) {
+if (
+  process.env.NODE_ENV !== 'test' &&
+  process.env.npm_lifecycle_event !== 'test' &&
+  !process.env.NODE_TEST_CONTEXT &&
+  !process.env.VERCEL
+) {
   app.listen(PORT, () => {
     console.log(`==================================================`);
     console.log(`🚀 LegalLens AI Backend Server running on http://localhost:${PORT}`);

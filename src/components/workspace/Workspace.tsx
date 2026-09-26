@@ -19,23 +19,42 @@ import {
   SlidersHorizontal 
 } from 'lucide-react';
 import { DemoBanner } from '../ui/DisclaimerBanner';
+import { analyzeDocumentWithAi } from '../../services/api/legalAnalysisApi';
 
 interface WorkspaceProps {
   document: LegalDocument;
   onUploadNewClick: () => void;
+  onUpdateDocument?: (doc: LegalDocument) => void;
 }
 
 type RightPanelTab = 'analysis' | 'clauses' | 'chat' | 'actions';
 
 export const Workspace: React.FC<WorkspaceProps> = ({
   document: doc,
-  onUploadNewClick
+  onUploadNewClick,
+  onUpdateDocument
 }) => {
   const [selectedClauseId, setSelectedClauseId] = useState<string | null>(
     doc.clauses.length > 0 ? doc.clauses[0]?.id : null
   );
   const [rightPanelTab, setRightPanelTab] = useState<RightPanelTab>('analysis');
   const [clauseCategoryFilter, setClauseCategoryFilter] = useState<ClauseCategory | 'All'>('All');
+  const [isAnalyzingAi, setIsAnalyzingAi] = useState<boolean>(false);
+
+  const handleTriggerAiAnalysis = async () => {
+    if (isAnalyzingAi) return;
+    setIsAnalyzingAi(true);
+    try {
+      const analyzedDoc = await analyzeDocumentWithAi(doc);
+      if (onUpdateDocument) {
+        onUpdateDocument(analyzedDoc);
+      }
+    } catch (err) {
+      console.error('Failed to trigger AI analysis:', err);
+    } finally {
+      setIsAnalyzingAi(false);
+    }
+  };
   
   // Mobile active pane
   const [mobileActiveView, setMobileActiveView] = useState<'document' | 'sidebar' | 'panel'>('document');
@@ -302,6 +321,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               <AnalysisSection
                 document={doc}
                 onJumpToClause={handleJumpToClauseRef}
+                onTriggerAiAnalysis={handleTriggerAiAnalysis}
+                isAnalyzing={isAnalyzingAi}
               />
             )}
 
