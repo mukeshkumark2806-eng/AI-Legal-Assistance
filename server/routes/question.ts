@@ -22,15 +22,15 @@ questionRouter.post('/document-question', async (req: Request, res: Response) =>
     });
   } catch (err: any) {
     console.error('Error answering document question:', err);
-    if (err instanceof GroqServiceError) {
-      return res.status(err.statusCode).json({
+    if (err instanceof GroqServiceError || err?.name === 'GroqServiceError') {
+      return res.status(err.statusCode || 500).json({
         error: err.message,
-        code: err.code
+        code: err.code || 'GROQ_ERROR'
       });
     }
 
     return res.status(500).json({
-      error: 'An unexpected server error occurred while answering document question.',
+      error: err?.message || 'An unexpected server error occurred while answering document question.',
       code: 'INTERNAL_SERVER_ERROR'
     });
   }

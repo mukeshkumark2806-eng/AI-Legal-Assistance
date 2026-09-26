@@ -22,15 +22,15 @@ analyzeRouter.post('/analyze-document', async (req: Request, res: Response) => {
     });
   } catch (err: any) {
     console.error('Error analyzing document:', err);
-    if (err instanceof GroqServiceError) {
-      return res.status(err.statusCode).json({
+    if (err instanceof GroqServiceError || err?.name === 'GroqServiceError') {
+      return res.status(err.statusCode || 500).json({
         error: err.message,
-        code: err.code
+        code: err.code || 'GROQ_ERROR'
       });
     }
 
     return res.status(500).json({
-      error: 'An unexpected server error occurred during legal document analysis.',
+      error: err?.message || 'An unexpected server error occurred during legal document analysis.',
       code: 'INTERNAL_SERVER_ERROR'
     });
   }

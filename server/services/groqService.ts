@@ -17,8 +17,8 @@ export class GroqServiceError extends Error {
 
 class GroqClientManager {
   private client: Groq | null = null;
-  private defaultModel = 'openai/gpt-oss-120b';
-  private fallbackModel = 'openai/gpt-oss-20b';
+  private defaultModel = 'llama-3.3-70b-versatile';
+  private fallbackModel = 'llama-3.1-8b-instant';
 
   // Known valid Groq model IDs — prevents invalid GROQ_MODEL env vars from crashing the server
   private validModels = new Set([
@@ -30,8 +30,8 @@ class GroqClientManager {
     'llama-3.3-70b-specdec',
     'mixtral-8x7b-32768',
     'gemma2-9b-it',
-    'openai/gpt-oss-120b',
-    'openai/gpt-oss-20b',
+    'deepseek-r1-distill-llama-70b',
+    'qwen-2.5-coder-32b'
   ]);
 
   public getModel(): string {
@@ -40,7 +40,7 @@ class GroqClientManager {
       return envModel;
     }
     if (envModel) {
-      console.warn(`[GroqService] GROQ_MODEL env var "${envModel}" is not in the known-valid list. Falling back to default: ${this.defaultModel}`);
+      console.warn(`[GroqService] GROQ_MODEL env var "${envModel}" is invalid. Falling back to default: ${this.defaultModel}`);
     }
     return this.defaultModel;
   }
@@ -78,7 +78,7 @@ class GroqClientManager {
         messages: params.messages,
         response_format: { type: 'json_object' },
         temperature: params.temperature ?? 0.1,
-        max_completion_tokens: params.maxTokens ?? 8192
+        max_completion_tokens: params.maxTokens ?? 4000
       });
 
       const text = completion.choices[0]?.message?.content;
@@ -88,19 +88,12 @@ class GroqClientManager {
 
       return { content: text, model: primaryModel };
     } catch (err: any) {
-      // If primary model failed due to model_not_found or temporary rate limit, try fallback model if different
+      // If primary model failed due to model_not_found, 404, rate limit (429), or json format error, immediately try fast fallback model
       if (
         primaryModel !== this.fallbackModel &&
-        (err?.status === 404 || err?.error?.code === 'model_not_found' || err?.status === 429 || err?.error?.code === 'json_validate_failed')
+        (err?.status === 404 || err?.status === 429 || err?.error?.code === 'model_not_found' || err?.error?.code === 'json_validate_failed')
       ) {
-        if (err?.status === 429) {
-          const match = String(err?.message || '').match(/try again in ([0-9.]+)s/i);
-          const waitMs = match ? Math.ceil(parseFloat(match[1]) * 1000) + 1000 : 10000;
-          console.warn(`Primary model rate limited. Waiting ${waitMs}ms before trying fallback ${this.fallbackModel}...`);
-          await new Promise((r) => setTimeout(r, Math.min(waitMs, 25000)));
-        } else {
-          console.warn(`Primary model ${primaryModel} encountered issue (${err?.message}). Trying fallback ${this.fallbackModel}...`);
-        }
+        console.warn(`Primary model ${primaryModel} failed (${err?.message || err?.status}). Immediately calling fast fallback ${this.fallbackModel}...`);
 
         try {
           const fallbackCompletion = await client.chat.completions.create({
@@ -108,7 +101,7 @@ class GroqClientManager {
             messages: params.messages,
             response_format: { type: 'json_object' },
             temperature: params.temperature ?? 0.1,
-            max_completion_tokens: params.maxTokens ?? 8192
+            max_completion_tokens: params.maxTokens ?? 4000
           });
 
           const text = fallbackCompletion.choices[0]?.message?.content;
@@ -116,25 +109,7 @@ class GroqClientManager {
             return { content: text, model: this.fallbackModel };
           }
         } catch (fallbackErr: any) {
-          if (fallbackErr?.status === 429) {
-            const match2 = String(fallbackErr?.message || '').match(/try again in ([0-9.]+)s/i);
-            const waitMs2 = match2 ? Math.ceil(parseFloat(match2[1]) * 1000) + 1000 : 12000;
-            console.warn(`Fallback also rate limited. Waiting ${waitMs2}ms before retry...`);
-            await new Promise((r) => setTimeout(r, Math.min(waitMs2, 25000)));
-
-            const retryCompletion = await client.chat.completions.create({
-              model: this.fallbackModel,
-              messages: params.messages,
-              response_format: { type: 'json_object' },
-              temperature: params.temperature ?? 0.1,
-              max_completion_tokens: params.maxTokens ?? 8192
-            });
-            const text2 = retryCompletion.choices[0]?.message?.content;
-            if (text2) {
-              return { content: text2, model: this.fallbackModel };
-            }
-          }
-          console.error('Fallback model also failed:', fallbackErr);
+          console.error('Fallback model also encountered error:', fallbackErr);
         }
       }
 
@@ -154,7 +129,7 @@ class GroqClientManager {
       throw new GroqServiceError('Invalid Groq API key.', 401, 'INVALID_API_KEY');
     }
     if (status === 429) {
-      throw new GroqServiceError('Groq API rate limit exceeded. Please wait a moment before trying again.', 429, 'RATE_LIMIT');
+      throw new GroqServiceError('Groq API rate limit exceeded. Please try again in a few seconds.', 429, 'RATE_LIMIT');
     }
     if (status === 413) {
       throw new GroqServiceError('The document payload exceeds the model context limit.', 413, 'DOCUMENT_TOO_LARGE');
@@ -162,8 +137,11 @@ class GroqClientManager {
     if (status === 400) {
       throw new GroqServiceError(`Invalid request to Groq: ${sanitizedMsg}`, 400, 'BAD_REQUEST');
     }
+    if (status === 404 || msg.includes('model_not_found')) {
+      throw new GroqServiceError(`Groq model unavailable: ${sanitizedMsg}`, 400, 'MODEL_NOT_FOUND');
+    }
 
-    throw new GroqServiceError(`Groq service unavailable: ${sanitizedMsg}`, status, 'GROQ_API_FAILURE');
+    throw new GroqServiceError(`Groq service error: ${sanitizedMsg}`, status, 'GROQ_API_FAILURE');
   }
 }
 
