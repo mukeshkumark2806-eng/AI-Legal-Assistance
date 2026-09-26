@@ -194,18 +194,18 @@ export type InputSection = z.infer<typeof InputSectionSchema>;
 // Request Schema for /api/analyze-document
 export const AnalyzeDocumentRequestSchema = z.object({
   documentName: z.string().min(1, 'Document name is required'),
-  fileType: z.enum(['PDF', 'DOCX']),
+  fileType: z.preprocess((v) => (typeof v === 'string' ? v.toUpperCase() : v), z.enum(['PDF', 'DOCX'])),
   totalPages: z.number().int().positive().default(1),
-  rawText: z.string().min(1, 'Document rawText cannot be empty'),
+  rawText: z.string().min(1, 'Document rawText cannot be empty').max(2000000, 'Document rawText exceeds maximum limit of 2,000,000 characters'),
   sections: z.array(InputSectionSchema).min(1, 'At least one document section is required')
 });
 export type AnalyzeDocumentRequest = z.infer<typeof AnalyzeDocumentRequestSchema>;
 
 // Document Q&A Request & Response Schemas
 export const DocumentQuestionRequestSchema = z.object({
-  question: z.string().min(1, 'Question cannot be empty'),
+  question: z.string().min(1, 'Question cannot be empty').max(5000, 'Question exceeds maximum limit of 5,000 characters'),
   documentName: z.string(),
-  rawText: z.string().optional(),
+  rawText: z.string().max(2000000, 'Document rawText exceeds maximum limit of 2,000,000 characters').optional(),
   sections: z.array(InputSectionSchema).min(1, 'Document sections are required')
 });
 export type DocumentQuestionRequest = z.infer<typeof DocumentQuestionRequestSchema>;

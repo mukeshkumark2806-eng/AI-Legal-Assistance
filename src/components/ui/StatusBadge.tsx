@@ -1,5 +1,5 @@
 import React from 'react';
-import type { ClauseCategory, ImportanceLevel, ComparisonChangeType } from '../../types/document';
+import type { ClauseCategory } from '../../types/document';
 import { 
   AlertCircle, 
   Calendar, 
@@ -13,11 +13,11 @@ import {
 } from 'lucide-react';
 
 interface CategoryBadgeProps {
-  category: ClauseCategory;
+  category: ClauseCategory | string;
   size?: 'sm' | 'md';
 }
 
-export const CategoryBadge: React.FC<{ category: string; size?: 'sm' | 'md' }> = ({ category, size = 'md' }) => {
+export const CategoryBadge: React.FC<CategoryBadgeProps> = ({ category, size = 'md' }) => {
   const sizeClasses = size === 'sm' ? 'text-[11px] px-2 py-0.5 gap-1' : 'text-xs px-2.5 py-1 gap-1.5';
   const catKey = (category || '').toUpperCase();
 

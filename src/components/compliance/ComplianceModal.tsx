@@ -3,11 +3,9 @@ import {
   FileText, 
   Shield, 
   ShieldAlert, 
-  Lock, 
   Cpu, 
   CheckCircle2, 
   AlertTriangle, 
-  ExternalLink,
   ArrowRight,
   X,
   Scale,
@@ -33,6 +31,22 @@ export const ComplianceModal: React.FC<ComplianceModalProps> = ({
   onNavigateToWorkspace
 }) => {
   if (!type) return null;
+
+  const tabIds: ComplianceDocType[] = ['terms', 'privacy', 'disclaimer', 'security'];
+
+  const handleComplianceTabKeyDown = (e: React.KeyboardEvent, index: number) => {
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      const nextIndex = (index + 1) % tabIds.length;
+      onSelectType(tabIds[nextIndex]);
+      document.getElementById(`compliance-tab-${tabIds[nextIndex]}`)?.focus();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const prevIndex = (index - 1 + tabIds.length) % tabIds.length;
+      onSelectType(tabIds[prevIndex]);
+      document.getElementById(`compliance-tab-${tabIds[prevIndex]}`)?.focus();
+    }
+  };
 
   const tabs: { id: ComplianceDocType; label: string; icon: React.ReactNode }[] = [
     { id: 'terms', label: 'Terms of Service', icon: <FileText className="w-4 h-4" /> },
@@ -67,7 +81,7 @@ export const ComplianceModal: React.FC<ComplianceModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
@@ -75,19 +89,25 @@ export const ComplianceModal: React.FC<ComplianceModalProps> = ({
         </div>
 
         {/* Tab Navigation */}
-        <div className="px-6 pt-3 border-b border-slate-200 bg-white flex flex-wrap gap-1 shrink-0">
-          {tabs.map((tab) => (
+        <div role="tablist" aria-label="Legal and Compliance Topics" className="px-6 pt-3 border-b border-slate-200 bg-white flex flex-wrap gap-1 shrink-0">
+          {tabs.map((tab, idx) => (
             <button
               key={tab.id}
               type="button"
+              role="tab"
+              id={`compliance-tab-${tab.id}`}
+              aria-selected={type === tab.id}
+              aria-controls={`compliance-panel-${tab.id}`}
+              tabIndex={type === tab.id ? 0 : -1}
+              onKeyDown={(e) => handleComplianceTabKeyDown(e, idx)}
               onClick={() => onSelectType(tab.id)}
-              className={`px-3 py-2 text-xs font-semibold rounded-t-lg transition-colors flex items-center gap-2 cursor-pointer border-b-2 -mb-[2px] ${
+              className={`px-3 py-2 text-xs font-semibold rounded-t-lg transition-colors flex items-center gap-2 cursor-pointer border-b-2 -mb-[2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                 type === tab.id
                   ? 'border-indigo-600 text-indigo-700 bg-indigo-50/50'
                   : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
-              {tab.icon}
+              <span aria-hidden="true">{tab.icon}</span>
               <span>{tab.label}</span>
             </button>
           ))}
@@ -97,7 +117,7 @@ export const ComplianceModal: React.FC<ComplianceModalProps> = ({
         <div className="px-6 py-6 overflow-y-auto space-y-6 text-xs text-slate-700 leading-relaxed">
           {/* 1. TERMS OF SERVICE */}
           {type === 'terms' && (
-            <div className="space-y-5">
+            <div id="compliance-panel-terms" role="tabpanel" aria-labelledby="compliance-tab-terms" tabIndex={0} className="space-y-5 focus:outline-none">
               <div>
                 <h2 className="text-lg font-bold text-slate-900 tracking-tight">Terms of Service</h2>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -158,7 +178,7 @@ export const ComplianceModal: React.FC<ComplianceModalProps> = ({
 
           {/* 2. PRIVACY POLICY & GDPR */}
           {type === 'privacy' && (
-            <div className="space-y-5">
+            <div id="compliance-panel-privacy" role="tabpanel" aria-labelledby="compliance-tab-privacy" tabIndex={0} className="space-y-5 focus:outline-none">
               <div>
                 <h2 className="text-lg font-bold text-slate-900 tracking-tight">Privacy Policy & Data Processing Notice</h2>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -222,7 +242,7 @@ export const ComplianceModal: React.FC<ComplianceModalProps> = ({
 
           {/* 3. INFORMATIONAL DISCLAIMER */}
           {type === 'disclaimer' && (
-            <div className="space-y-5">
+            <div id="compliance-panel-disclaimer" role="tabpanel" aria-labelledby="compliance-tab-disclaimer" tabIndex={0} className="space-y-5 focus:outline-none">
               <div>
                 <h2 className="text-lg font-bold text-slate-900 tracking-tight">Informational Disclaimer</h2>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -269,7 +289,7 @@ export const ComplianceModal: React.FC<ComplianceModalProps> = ({
 
           {/* 4. SECURITY WHITEPAPER */}
           {type === 'security' && (
-            <div className="space-y-5">
+            <div id="compliance-panel-security" role="tabpanel" aria-labelledby="compliance-tab-security" tabIndex={0} className="space-y-5 focus:outline-none">
               <div>
                 <h2 className="text-lg font-bold text-slate-900 tracking-tight">Security Whitepaper & Architecture</h2>
                 <p className="text-xs text-slate-500 mt-0.5">

@@ -3,8 +3,7 @@ import {
   DocumentQuestionResponseSchema,
   type DocumentQuestionRequest,
   type DocumentQuestionResponse,
-  type InputSection,
-  type Citation
+  type InputSection
 } from '../schemas/legalAnalysisSchema.ts';
 
 const QA_SYSTEM_PROMPT = `You are LegalLens Document Assistant. Your job is to answer user questions strictly and solely based on the provided document excerpts.
@@ -171,7 +170,7 @@ Analyze only the provided excerpts above. The supplied section numbers and title
   let parsed: any;
   try {
     parsed = safeParseJson(completion.content);
-  } catch (err) {
+  } catch {
     throw new GroqServiceError('Failed to parse AI response for document Q&A.', 502, 'INVALID_JSON');
   }
 

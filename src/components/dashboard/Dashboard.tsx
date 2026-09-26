@@ -1,25 +1,13 @@
 import React from 'react';
 import type { LegalDocument } from '../../types/document';
 import { 
-  AlertCircle, 
   ArrowRight, 
-  CheckCircle2, 
-  Clock, 
-  Eye, 
   FileCheck2, 
   FileDiff, 
   FileSearch, 
-  FileText, 
-  FileUp, 
   GitCompare, 
-  HelpCircle, 
-  Lock, 
-  Scale, 
-  Search, 
   Shield, 
-  ShieldCheck, 
-  Sparkles, 
-  Users 
+  ShieldCheck 
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { UploadZone } from '../upload/UploadZone';

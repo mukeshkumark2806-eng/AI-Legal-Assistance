@@ -131,7 +131,7 @@ var LawyerQuestionSchema = z.object({
   clauseRef: z.string().describe("Section reference"),
   reason: z.string().describe("Strategic legal reasoning behind asking this specific question")
 });
-var FullLegalAnalysisSchema = z.object({
+var _FullLegalAnalysisSchema = z.object({
   documentOverview: DocumentOverviewSchema,
   clauses: z.array(ClauseSchema).default([]),
   keyObligations: z.array(KeyObligationSchema).default([]),
@@ -151,7 +151,7 @@ var InputSectionSchema = z.object({
   text: z.string().optional(),
   sourceReference: z.string().optional()
 });
-var AnalyzeDocumentRequestSchema = z.object({
+var _AnalyzeDocumentRequestSchema = z.object({
   documentName: z.string().min(1, "Document name is required"),
   fileType: z.enum(["PDF", "DOCX"]),
   totalPages: z.number().int().positive().default(1),
@@ -211,7 +211,7 @@ function safeParseJson(rawText) {
     return JSON.parse(clean);
   } catch (firstErr) {
     try {
-      let repaired = clean.replace(/,\s*([\}\]])/g, "$1");
+      let repaired = clean.replace(/,\s*([}\]])/g, "$1");
       repaired = repaired.replace(/,\s*"[^"]*$/, "");
       repaired = repaired.replace(/,\s*$/, "");
       const openBraces = (repaired.match(/\{/g) || []).length;
@@ -221,19 +221,20 @@ function safeParseJson(rawText) {
       for (let i = 0; i < openBrackets - closeBrackets; i++) repaired += "]";
       for (let i = 0; i < openBraces - closeBraces; i++) repaired += "}";
       return JSON.parse(repaired);
-    } catch (_secondErr) {
+    } catch {
       throw firstErr;
     }
   }
 }
 var GroqClientManager = class {
   client = null;
-  defaultModel = "openai/gpt-oss-20b";
+  defaultModel = "qwen/qwen3.8-27b";
   fallbackModel = "openai/gpt-oss-120b";
   // Known valid Groq model IDs — prevents invalid GROQ_MODEL env vars from crashing the server
   validModels = /* @__PURE__ */ new Set([
-    "openai/gpt-oss-20b",
+    "qwen/qwen3.8-27b",
     "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
     "openai/gpt-oss-safeguard-20b"
   ]);
   getModel() {
@@ -494,7 +495,7 @@ Analyze only the provided excerpts above. The supplied section numbers and title
   let parsed;
   try {
     parsed = safeParseJson(completion.content);
-  } catch (err) {
+  } catch {
     throw new GroqServiceError("Failed to parse AI response for document Q&A.", 502, "INVALID_JSON");
   }
   if (Array.isArray(parsed?.citations)) {

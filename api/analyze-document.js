@@ -158,7 +158,7 @@ var AnalyzeDocumentRequestSchema = z.object({
   rawText: z.string().min(1, "Document rawText cannot be empty"),
   sections: z.array(InputSectionSchema).min(1, "At least one document section is required")
 });
-var DocumentQuestionRequestSchema = z.object({
+var _DocumentQuestionRequestSchema = z.object({
   question: z.string().min(1, "Question cannot be empty"),
   documentName: z.string(),
   rawText: z.string().optional(),
@@ -171,7 +171,7 @@ var CitationSchema = z.object({
   pageNumber: z.number().nullable().optional(),
   sourceSnippet: z.string()
 });
-var DocumentQuestionResponseSchema = z.object({
+var _DocumentQuestionResponseSchema = z.object({
   answer: z.string(),
   isFoundInDocument: z.boolean(),
   citations: z.array(CitationSchema).default([]),
@@ -211,7 +211,7 @@ function safeParseJson(rawText) {
     return JSON.parse(clean);
   } catch (firstErr) {
     try {
-      let repaired = clean.replace(/,\s*([\}\]])/g, "$1");
+      let repaired = clean.replace(/,\s*([}\]])/g, "$1");
       repaired = repaired.replace(/,\s*"[^"]*$/, "");
       repaired = repaired.replace(/,\s*$/, "");
       const openBraces = (repaired.match(/\{/g) || []).length;
@@ -221,19 +221,20 @@ function safeParseJson(rawText) {
       for (let i = 0; i < openBrackets - closeBrackets; i++) repaired += "]";
       for (let i = 0; i < openBraces - closeBraces; i++) repaired += "}";
       return JSON.parse(repaired);
-    } catch (_secondErr) {
+    } catch {
       throw firstErr;
     }
   }
 }
 var GroqClientManager = class {
   client = null;
-  defaultModel = "openai/gpt-oss-20b";
+  defaultModel = "qwen/qwen3.8-27b";
   fallbackModel = "openai/gpt-oss-120b";
   // Known valid Groq model IDs — prevents invalid GROQ_MODEL env vars from crashing the server
   validModels = /* @__PURE__ */ new Set([
-    "openai/gpt-oss-20b",
+    "qwen/qwen3.8-27b",
     "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
     "openai/gpt-oss-safeguard-20b"
   ]);
   getModel() {
@@ -785,7 +786,7 @@ Ensure explanations are concise, crisp, and plain-English (1-2 sentences per fie
   let parsedJson;
   try {
     parsedJson = safeParseJson(completionResult.content);
-  } catch (parseErr) {
+  } catch {
     console.error("Failed to parse JSON response from Groq:", completionResult.content);
     throw new GroqServiceError("AI service returned an invalid JSON response.", 502, "INVALID_JSON");
   }

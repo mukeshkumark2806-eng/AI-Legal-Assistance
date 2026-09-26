@@ -27,7 +27,7 @@ export async function extractTextFromPdf(
   let arrayBuffer: ArrayBuffer;
   try {
     arrayBuffer = await file.arrayBuffer();
-  } catch (err) {
+  } catch {
     throw new Error('Failed to read file from local disk. Please check file permissions and try again.');
   }
 

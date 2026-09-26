@@ -58,7 +58,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenCompliance }) 
                 <button
                   type="button"
                   onClick={() => onNavigate('dashboard')}
-                  className="hover:text-slate-900 transition-colors cursor-pointer text-left"
+                  className="hover:text-slate-900 transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded px-1 -mx-1"
                 >
                   Dashboard & Upload
                 </button>
@@ -67,7 +67,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenCompliance }) 
                 <button
                   type="button"
                   onClick={() => onNavigate('workspace')}
-                  className="hover:text-slate-900 transition-colors cursor-pointer text-left"
+                  className="hover:text-slate-900 transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded px-1 -mx-1"
                 >
                   Document Intelligence
                 </button>
@@ -76,7 +76,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenCompliance }) 
                 <button
                   type="button"
                   onClick={() => onNavigate('compare')}
-                  className="hover:text-slate-900 transition-colors cursor-pointer text-left"
+                  className="hover:text-slate-900 transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded px-1 -mx-1"
                 >
                   Compare Documents
                 </button>
@@ -85,7 +85,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenCompliance }) 
                 <button
                   type="button"
                   onClick={() => onNavigate('my-documents')}
-                  className="hover:text-slate-900 transition-colors cursor-pointer text-left"
+                  className="hover:text-slate-900 transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded px-1 -mx-1"
                 >
                   My Documents Repository
                 </button>
@@ -103,7 +103,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenCompliance }) 
                 <button
                   type="button"
                   onClick={() => handleOpenCompliance('terms')}
-                  className="hover:text-slate-900 transition-colors cursor-pointer text-left"
+                  className="hover:text-slate-900 transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded px-1 -mx-1"
                 >
                   Terms of Service
                 </button>
@@ -112,7 +112,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenCompliance }) 
                 <button
                   type="button"
                   onClick={() => handleOpenCompliance('privacy')}
-                  className="hover:text-slate-900 transition-colors cursor-pointer text-left"
+                  className="hover:text-slate-900 transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded px-1 -mx-1"
                 >
                   Privacy Policy & GDPR
                 </button>
@@ -121,7 +121,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenCompliance }) 
                 <button
                   type="button"
                   onClick={() => handleOpenCompliance('disclaimer')}
-                  className="hover:text-slate-900 transition-colors cursor-pointer text-left"
+                  className="hover:text-slate-900 transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded px-1 -mx-1"
                 >
                   Informational Disclaimer
                 </button>
@@ -130,7 +130,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenCompliance }) 
                 <button
                   type="button"
                   onClick={() => handleOpenCompliance('security')}
-                  className="hover:text-slate-900 transition-colors cursor-pointer text-left"
+                  className="hover:text-slate-900 transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded px-1 -mx-1"
                 >
                   Security Whitepaper
                 </button>

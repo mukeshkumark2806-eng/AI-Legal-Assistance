@@ -1,17 +1,11 @@
 import React, { useState } from 'react';
 import { 
-  Bell, 
-  ChevronDown, 
   FileCheck2, 
   FileDiff, 
-  FileText, 
   FolderOpen, 
-  Layers, 
   Menu, 
   Scale, 
   Settings, 
-  Shield, 
-  Sparkles, 
   Upload, 
   User, 
   X 
@@ -49,10 +43,11 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={() => handleNavClick('dashboard')}
-              className="flex items-center gap-2.5 group cursor-pointer text-left"
+              aria-label="LegalLens - Return to dashboard"
+              className="flex items-center gap-2.5 group cursor-pointer text-left rounded-lg p-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
             >
               <div className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs group-hover:bg-slate-800 transition-colors">
-                <Scale className="w-5 h-5 text-indigo-400" />
+                <Scale className="w-5 h-5 text-indigo-400" aria-hidden="true" />
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5">
@@ -60,50 +55,53 @@ export const Header: React.FC<HeaderProps> = ({
                     LegalLens
                   </span>
                 </div>
-                <span className="text-[10px] text-slate-400 font-medium tracking-wide">
+                <span className="text-[10px] text-slate-500 font-medium tracking-wide">
                   DOCUMENT INTELLIGENCE
                 </span>
               </div>
             </button>
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden md:flex items-center gap-1">
+            <nav aria-label="Main navigation" className="hidden md:flex items-center gap-1">
               <button
                 type="button"
                 onClick={() => handleNavClick('workspace')}
-                className={`px-3 py-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
+                aria-current={currentTab === 'workspace' ? 'page' : undefined}
+                className={`px-3 py-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                   currentTab === 'workspace'
                     ? 'bg-slate-100 text-slate-900'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
-                <FileCheck2 className="w-3.5 h-3.5" />
+                <FileCheck2 className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Document Intelligence</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleNavClick('compare')}
-                className={`px-3 py-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
+                aria-current={currentTab === 'compare' ? 'page' : undefined}
+                className={`px-3 py-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                   currentTab === 'compare'
                     ? 'bg-slate-100 text-slate-900'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
-                <FileDiff className="w-3.5 h-3.5" />
+                <FileDiff className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Compare Documents</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleNavClick('my-documents')}
-                className={`px-3 py-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
+                aria-current={currentTab === 'my-documents' ? 'page' : undefined}
+                className={`px-3 py-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                   currentTab === 'my-documents'
                     ? 'bg-slate-100 text-slate-900'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
-                <FolderOpen className="w-3.5 h-3.5" />
+                <FolderOpen className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>My Documents</span>
               </button>
             </nav>
@@ -116,6 +114,7 @@ export const Header: React.FC<HeaderProps> = ({
               size="sm"
               icon={<Upload className="w-3.5 h-3.5" />}
               onClick={onUploadClick}
+              aria-label="Upload and analyze a legal document"
             >
               Analyze Document
             </Button>
@@ -123,22 +122,26 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={onOpenSettings}
-              className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
-              title="Settings"
+              className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              aria-label="Open application settings and preferences"
+              title="Settings & Preferences"
             >
-              <Settings className="w-4 h-4" />
+              <Settings className="w-4 h-4" aria-hidden="true" />
             </button>
 
             {/* Guest / Workspace State Indicator */}
             <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-              <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 border border-slate-200 flex items-center justify-center font-medium text-xs">
+              <div 
+                className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 border border-slate-200 flex items-center justify-center font-medium text-xs"
+                aria-hidden="true"
+              >
                 <User className="w-4 h-4 text-slate-500" />
               </div>
               <div className="hidden lg:block text-left">
                 <span className="text-xs font-semibold text-slate-800 block leading-tight">
                   Guest
                 </span>
-                <span className="text-[10px] text-slate-400 block font-mono">
+                <span className="text-[10px] text-slate-500 block font-mono">
                   Document Workspace
                 </span>
               </div>
@@ -150,10 +153,11 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-lg text-slate-600 hover:bg-slate-100"
-              aria-label="Toggle navigation menu"
+              className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={isMobileMenuOpen}
             >
-              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {isMobileMenuOpen ? <X className="w-5 h-5" aria-hidden="true" /> : <Menu className="w-5 h-5" aria-hidden="true" />}
             </button>
           </div>
         </div>
@@ -161,11 +165,12 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Mobile Menu Dropdown */}
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-200 bg-white px-4 py-3 space-y-2">
+        <nav aria-label="Mobile navigation" className="md:hidden border-t border-slate-200 bg-white px-4 py-3 space-y-2">
           <button
             type="button"
             onClick={() => handleNavClick('dashboard')}
-            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium ${
+            aria-current={currentTab === 'dashboard' ? 'page' : undefined}
+            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
               currentTab === 'dashboard' ? 'bg-slate-100 text-slate-900 font-semibold' : 'text-slate-700'
             }`}
           >
@@ -174,7 +179,8 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={() => handleNavClick('workspace')}
-            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium ${
+            aria-current={currentTab === 'workspace' ? 'page' : undefined}
+            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
               currentTab === 'workspace' ? 'bg-slate-100 text-slate-900 font-semibold' : 'text-slate-700'
             }`}
           >
@@ -183,7 +189,8 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={() => handleNavClick('compare')}
-            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium ${
+            aria-current={currentTab === 'compare' ? 'page' : undefined}
+            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
               currentTab === 'compare' ? 'bg-slate-100 text-slate-900 font-semibold' : 'text-slate-700'
             }`}
           >
@@ -192,7 +199,8 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={() => handleNavClick('my-documents')}
-            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium ${
+            aria-current={currentTab === 'my-documents' ? 'page' : undefined}
+            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
               currentTab === 'my-documents' ? 'bg-slate-100 text-slate-900 font-semibold' : 'text-slate-700'
             }`}
           >
@@ -207,6 +215,7 @@ export const Header: React.FC<HeaderProps> = ({
                 setIsMobileMenuOpen(false);
                 onUploadClick();
               }}
+              aria-label="Analyze Document"
             >
               Analyze Document
             </Button>
@@ -218,11 +227,12 @@ export const Header: React.FC<HeaderProps> = ({
                 setIsMobileMenuOpen(false);
                 onOpenSettings();
               }}
+              aria-label="Settings and Preferences"
             >
               Settings & Preferences
             </Button>
           </div>
-        </div>
+        </nav>
       )}
     </header>
   );

@@ -4,16 +4,11 @@ import {
   ArrowRight, 
   CheckCircle2, 
   Clock, 
-  ExternalLink, 
   FileCheck2, 
   FileText, 
   FolderOpen, 
   Plus, 
-  Scale, 
-  Search, 
-  ShieldAlert, 
-  Sparkles, 
-  Trash2 
+  Search 
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 
@@ -108,8 +103,10 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
       <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
         <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-wrap items-center justify-between gap-3">
           <div className="relative w-full sm:w-72">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <label htmlFor="my-docs-search" className="sr-only">Search documents by name or party</label>
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" aria-hidden="true" />
             <input
+              id="my-docs-search"
               type="text"
               placeholder="Search documents by name or party..."
               className="w-full pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-900"

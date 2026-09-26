@@ -224,10 +224,10 @@ export type FullComparisonResult = z.infer<typeof FullComparisonResultSchema>;
 // Input Document for POST /api/compare-documents
 export const DocumentInputSchema = z.object({
   name: z.string().min(1, 'Document name is required'),
-  fileType: z.enum(['PDF', 'DOCX']),
+  fileType: z.preprocess((v) => (typeof v === 'string' ? v.toUpperCase() : v), z.enum(['PDF', 'DOCX'])),
   fileSize: z.string().optional(),
   totalPages: z.number().int().positive().default(1),
-  rawText: z.string().min(1, 'Document text cannot be empty'),
+  rawText: z.string().min(1, 'Document text cannot be empty').max(2000000, 'Document rawText exceeds maximum limit of 2,000,000 characters'),
   sections: z.array(InputSectionSchema).min(1, 'At least one section is required')
 });
 export type DocumentInput = z.infer<typeof DocumentInputSchema>;

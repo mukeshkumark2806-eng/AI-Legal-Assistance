@@ -30,7 +30,6 @@ import {
   RotateCcw, 
   Scale, 
   Search, 
-  ShieldAlert, 
   Sparkles, 
   Square, 
   UploadCloud 
@@ -241,6 +240,29 @@ export const ComparisonPanel: React.FC = () => {
   const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>('ALL');
   const [activeSeverityFilter, setActiveSeverityFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  const tabOrder: Array<'redline' | 'key-changes' | 'terms' | 'checklist'> = [
+    'redline',
+    'key-changes',
+    'terms',
+    'checklist'
+  ];
+
+  const handleTabKeyDown = (e: React.KeyboardEvent, index: number) => {
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      const nextIndex = (index + 1) % tabOrder.length;
+      const nextTab = tabOrder[nextIndex];
+      setActiveTab(nextTab);
+      document.getElementById(`comp-tab-${nextTab}`)?.focus();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const prevIndex = (index - 1 + tabOrder.length) % tabOrder.length;
+      const prevTab = tabOrder[prevIndex];
+      setActiveTab(prevTab);
+      document.getElementById(`comp-tab-${prevTab}`)?.focus();
+    }
+  };
 
   // UI helpers
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -455,19 +477,25 @@ export const ComparisonPanel: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Hidden file inputs */}
+      <label htmlFor="file-input-doc-a" className="sr-only">Upload Baseline Document A</label>
       <input
+        id="file-input-doc-a"
         type="file"
         ref={fileInputARef}
         onChange={handleFileSelectA}
         accept=".pdf,.docx"
         className="hidden"
+        aria-label="Upload Baseline Document A"
       />
+      <label htmlFor="file-input-doc-b" className="sr-only">Upload Revised Redline Document B</label>
       <input
+        id="file-input-doc-b"
         type="file"
         ref={fileInputBRef}
         onChange={handleFileSelectB}
         accept=".pdf,.docx"
         className="hidden"
+        aria-label="Upload Revised Redline Document B"
       />
 
       {/* Header & Controls */}
@@ -510,7 +538,7 @@ export const ComparisonPanel: React.FC = () => {
 
       {/* Error Banner */}
       {errorMessage && (
-        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 flex items-start gap-3 shadow-xs">
+        <div role="alert" aria-live="assertive" className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 flex items-start gap-3 shadow-xs">
           <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
           <div className="flex-1 text-sm">
             <h4 className="font-bold">Comparison Notice</h4>
@@ -556,7 +584,7 @@ export const ComparisonPanel: React.FC = () => {
           </div>
 
           {isExtractingA ? (
-            <div className="py-8 text-center space-y-3">
+            <div role="status" aria-live="polite" className="py-8 text-center space-y-3">
               <div className="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto" />
               <p className="text-sm font-semibold text-slate-800">
                 {progressA?.message || 'Extracting Document A...'}
@@ -653,7 +681,7 @@ export const ComparisonPanel: React.FC = () => {
           </div>
 
           {isExtractingB ? (
-            <div className="py-8 text-center space-y-3">
+            <div role="status" aria-live="polite" className="py-8 text-center space-y-3">
               <div className="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto" />
               <p className="text-sm font-semibold text-slate-800">
                 {progressB?.message || 'Extracting Document B...'}
@@ -757,7 +785,7 @@ export const ComparisonPanel: React.FC = () => {
 
       {/* Comparison In Progress Bar */}
       {isComparing && (
-        <div className="p-8 rounded-2xl bg-white border-2 border-indigo-200/90 shadow-sm space-y-4 text-center">
+        <div role="status" aria-live="polite" className="p-8 rounded-2xl bg-white border-2 border-indigo-200/90 shadow-sm space-y-4 text-center">
           <div className="w-12 h-12 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto" />
           <div>
             <h3 className="text-base font-bold text-slate-900">
@@ -811,8 +839,9 @@ export const ComparisonPanel: React.FC = () => {
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             <button
               type="button"
+              aria-pressed={activeTypeFilter === 'ALL'}
               onClick={() => setActiveTypeFilter('ALL')}
-              className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
+              className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                 activeTypeFilter === 'ALL'
                   ? 'bg-slate-900 text-white border-slate-900 shadow-sm ring-2 ring-slate-900/20'
                   : 'bg-white border-slate-200 hover:border-slate-300 text-slate-800'
@@ -828,8 +857,9 @@ export const ComparisonPanel: React.FC = () => {
 
             <button
               type="button"
+              aria-pressed={activeTypeFilter === 'ADDED'}
               onClick={() => setActiveTypeFilter('ADDED')}
-              className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
+              className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                 activeTypeFilter === 'ADDED'
                   ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm ring-2 ring-emerald-700/20'
                   : 'bg-white border-slate-200 hover:border-emerald-300 text-slate-800'
@@ -839,7 +869,7 @@ export const ComparisonPanel: React.FC = () => {
                 <span className={`text-[11px] uppercase tracking-wider block font-medium ${activeTypeFilter === 'ADDED' ? 'text-emerald-100' : 'text-emerald-700'}`}>
                   Added
                 </span>
-                <PlusCircle className={`w-3.5 h-3.5 ${activeTypeFilter === 'ADDED' ? 'text-white' : 'text-emerald-600'}`} />
+                <PlusCircle className={`w-3.5 h-3.5 ${activeTypeFilter === 'ADDED' ? 'text-white' : 'text-emerald-600'}`} aria-hidden="true" />
               </div>
               <span className="text-2xl font-bold font-mono mt-0.5 block">
                 {comparisonResult.summary.addedCount}
@@ -848,8 +878,9 @@ export const ComparisonPanel: React.FC = () => {
 
             <button
               type="button"
+              aria-pressed={activeTypeFilter === 'MODIFIED'}
               onClick={() => setActiveTypeFilter('MODIFIED')}
-              className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
+              className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
                 activeTypeFilter === 'MODIFIED'
                   ? 'bg-amber-700 text-white border-amber-700 shadow-sm ring-2 ring-amber-700/20'
                   : 'bg-white border-slate-200 hover:border-amber-300 text-slate-800'
@@ -859,7 +890,7 @@ export const ComparisonPanel: React.FC = () => {
                 <span className={`text-[11px] uppercase tracking-wider block font-medium ${activeTypeFilter === 'MODIFIED' ? 'text-amber-100' : 'text-amber-700'}`}>
                   Modified
                 </span>
-                <RefreshCw className={`w-3.5 h-3.5 ${activeTypeFilter === 'MODIFIED' ? 'text-white' : 'text-amber-600'}`} />
+                <RefreshCw className={`w-3.5 h-3.5 ${activeTypeFilter === 'MODIFIED' ? 'text-white' : 'text-amber-600'}`} aria-hidden="true" />
               </div>
               <span className="text-2xl font-bold font-mono mt-0.5 block">
                 {comparisonResult.summary.modifiedCount}
@@ -868,8 +899,9 @@ export const ComparisonPanel: React.FC = () => {
 
             <button
               type="button"
+              aria-pressed={activeTypeFilter === 'REMOVED'}
               onClick={() => setActiveTypeFilter('REMOVED')}
-              className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
+              className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 ${
                 activeTypeFilter === 'REMOVED'
                   ? 'bg-rose-700 text-white border-rose-700 shadow-sm ring-2 ring-rose-700/20'
                   : 'bg-white border-slate-200 hover:border-rose-300 text-slate-800'
@@ -879,7 +911,7 @@ export const ComparisonPanel: React.FC = () => {
                 <span className={`text-[11px] uppercase tracking-wider block font-medium ${activeTypeFilter === 'REMOVED' ? 'text-rose-100' : 'text-rose-700'}`}>
                   Removed
                 </span>
-                <MinusCircle className={`w-3.5 h-3.5 ${activeTypeFilter === 'REMOVED' ? 'text-white' : 'text-rose-600'}`} />
+                <MinusCircle className={`w-3.5 h-3.5 ${activeTypeFilter === 'REMOVED' ? 'text-white' : 'text-rose-600'}`} aria-hidden="true" />
               </div>
               <span className="text-2xl font-bold font-mono mt-0.5 block">
                 {comparisonResult.summary.removedCount}
@@ -888,8 +920,9 @@ export const ComparisonPanel: React.FC = () => {
 
             <button
               type="button"
+              aria-pressed={activeTypeFilter === 'UNCHANGED'}
               onClick={() => setActiveTypeFilter('UNCHANGED')}
-              className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
+              className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 ${
                 activeTypeFilter === 'UNCHANGED'
                   ? 'bg-slate-700 text-white border-slate-700 shadow-sm ring-2 ring-slate-700/20'
                   : 'bg-white border-slate-200 hover:border-slate-300 text-slate-800'
@@ -899,7 +932,7 @@ export const ComparisonPanel: React.FC = () => {
                 <span className={`text-[11px] uppercase tracking-wider block font-medium ${activeTypeFilter === 'UNCHANGED' ? 'text-slate-300' : 'text-slate-500'}`}>
                   Unchanged
                 </span>
-                <FileText className={`w-3.5 h-3.5 ${activeTypeFilter === 'UNCHANGED' ? 'text-white' : 'text-slate-400'}`} />
+                <FileText className={`w-3.5 h-3.5 ${activeTypeFilter === 'UNCHANGED' ? 'text-white' : 'text-slate-400'}`} aria-hidden="true" />
               </div>
               <span className="text-2xl font-bold font-mono mt-0.5 block">
                 {comparisonResult.summary.unchangedCount}
@@ -908,11 +941,17 @@ export const ComparisonPanel: React.FC = () => {
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex border-b border-slate-200 overflow-x-auto">
+          <div role="tablist" aria-label="Comparison View Options" className="flex border-b border-slate-200 overflow-x-auto">
             <button
               type="button"
+              role="tab"
+              id="comp-tab-redline"
+              aria-selected={activeTab === 'redline'}
+              aria-controls="comp-panel-redline"
+              tabIndex={activeTab === 'redline' ? 0 : -1}
+              onKeyDown={(e) => handleTabKeyDown(e, 0)}
               onClick={() => setActiveTab('redline')}
-              className={`px-4 py-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap cursor-pointer ${
+              className={`px-4 py-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                 activeTab === 'redline'
                   ? 'border-indigo-600 text-indigo-600'
                   : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -922,8 +961,14 @@ export const ComparisonPanel: React.FC = () => {
             </button>
             <button
               type="button"
+              role="tab"
+              id="comp-tab-key-changes"
+              aria-selected={activeTab === 'key-changes'}
+              aria-controls="comp-panel-key-changes"
+              tabIndex={activeTab === 'key-changes' ? 0 : -1}
+              onKeyDown={(e) => handleTabKeyDown(e, 1)}
               onClick={() => setActiveTab('key-changes')}
-              className={`px-4 py-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap cursor-pointer ${
+              className={`px-4 py-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                 activeTab === 'key-changes'
                   ? 'border-indigo-600 text-indigo-600'
                   : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -933,8 +978,14 @@ export const ComparisonPanel: React.FC = () => {
             </button>
             <button
               type="button"
+              role="tab"
+              id="comp-tab-terms"
+              aria-selected={activeTab === 'terms'}
+              aria-controls="comp-panel-terms"
+              tabIndex={activeTab === 'terms' ? 0 : -1}
+              onKeyDown={(e) => handleTabKeyDown(e, 2)}
               onClick={() => setActiveTab('terms')}
-              className={`px-4 py-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap cursor-pointer ${
+              className={`px-4 py-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                 activeTab === 'terms'
                   ? 'border-indigo-600 text-indigo-600'
                   : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -944,8 +995,14 @@ export const ComparisonPanel: React.FC = () => {
             </button>
             <button
               type="button"
+              role="tab"
+              id="comp-tab-checklist"
+              aria-selected={activeTab === 'checklist'}
+              aria-controls="comp-panel-checklist"
+              tabIndex={activeTab === 'checklist' ? 0 : -1}
+              onKeyDown={(e) => handleTabKeyDown(e, 3)}
               onClick={() => setActiveTab('checklist')}
-              className={`px-4 py-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap cursor-pointer ${
+              className={`px-4 py-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                 activeTab === 'checklist'
                   ? 'border-indigo-600 text-indigo-600'
                   : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -957,12 +1014,14 @@ export const ComparisonPanel: React.FC = () => {
 
           {/* TAB 1: Visual Redline Cards */}
           {activeTab === 'redline' && (
-            <div className="space-y-6">
+            <div id="comp-panel-redline" role="tabpanel" aria-labelledby="comp-tab-redline" tabIndex={0} className="space-y-6 focus:outline-none">
               {/* Search & Secondary Filter Toolbar */}
               <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs flex flex-col sm:flex-row items-center gap-3">
                 <div className="relative flex-1 w-full">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <label htmlFor="comp-clause-search" className="sr-only">Search comparison clauses</label>
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" aria-hidden="true" />
                   <input
+                    id="comp-clause-search"
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -973,7 +1032,8 @@ export const ComparisonPanel: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 cursor-pointer"
+                      aria-label="Clear clause search query"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                     >
                       Clear
                     </button>
@@ -982,7 +1042,9 @@ export const ComparisonPanel: React.FC = () => {
 
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   {/* Category Filter */}
+                  <label htmlFor="comp-category-select" className="sr-only">Filter by category</label>
                   <select
+                    id="comp-category-select"
                     value={activeCategoryFilter}
                     onChange={(e) => setActiveCategoryFilter(e.target.value)}
                     className="text-xs px-2.5 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -1001,7 +1063,9 @@ export const ComparisonPanel: React.FC = () => {
                   </select>
 
                   {/* Severity Filter */}
+                  <label htmlFor="comp-severity-select" className="sr-only">Filter by severity</label>
                   <select
+                    id="comp-severity-select"
                     value={activeSeverityFilter}
                     onChange={(e) => setActiveSeverityFilter(e.target.value)}
                     className="text-xs px-2.5 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -1137,7 +1201,8 @@ export const ComparisonPanel: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => handleCopyText(change.oldText || '', `old-${change.id}`)}
-                              className="hover:text-slate-700 flex items-center gap-1 cursor-pointer"
+                              aria-label={`Copy Baseline text for ${change.sectionTitle}`}
+                              className="hover:text-slate-700 flex items-center gap-1 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500 rounded px-1"
                             >
                               {copiedId === `old-${change.id}` ? (
                                 <><Check className="w-3 h-3 text-emerald-600" /> Copied</>
@@ -1188,7 +1253,8 @@ export const ComparisonPanel: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => handleCopyText(change.newText || '', `new-${change.id}`)}
-                              className="hover:text-slate-700 flex items-center gap-1 cursor-pointer"
+                              aria-label={`Copy Revised Redline text for ${change.sectionTitle}`}
+                              className="hover:text-slate-700 flex items-center gap-1 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500 rounded px-1"
                             >
                               {copiedId === `new-${change.id}` ? (
                                 <><Check className="w-3 h-3 text-emerald-600" /> Copied</>
@@ -1208,7 +1274,7 @@ export const ComparisonPanel: React.FC = () => {
 
           {/* TAB 2: Material Shifts & Risk Changes */}
           {activeTab === 'key-changes' && (
-            <div className="space-y-6">
+            <div id="comp-panel-key-changes" role="tabpanel" aria-labelledby="comp-tab-key-changes" tabIndex={0} className="space-y-6 focus:outline-none">
               <div>
                 <h3 className="text-base font-bold text-slate-900">
                   Substantive Material Modifications ({comparisonResult.keyChanges.length})
@@ -1263,7 +1329,7 @@ export const ComparisonPanel: React.FC = () => {
 
           {/* TAB 3: Obligations & Deadlines */}
           {activeTab === 'terms' && (
-            <div className="space-y-6">
+            <div id="comp-panel-terms" role="tabpanel" aria-labelledby="comp-tab-terms" tabIndex={0} className="space-y-6 focus:outline-none">
               {/* Changed Obligations */}
               <div>
                 <h3 className="text-base font-bold text-slate-900">
@@ -1357,7 +1423,7 @@ export const ComparisonPanel: React.FC = () => {
 
           {/* TAB 4: Checklist & Lawyer Questions */}
           {activeTab === 'checklist' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div id="comp-panel-checklist" role="tabpanel" aria-labelledby="comp-tab-checklist" tabIndex={0} className="grid grid-cols-1 lg:grid-cols-2 gap-6 focus:outline-none">
               {/* Action Checklist */}
               <div className="space-y-4">
                 <div>
@@ -1374,10 +1440,19 @@ export const ComparisonPanel: React.FC = () => {
                   {comparisonResult.actionChecklist.map((act) => {
                     const isDone = completedTasks[act.id] ?? act.completed;
                     return (
-                      <div
+                      <button
                         key={act.id}
+                        type="button"
+                        role="checkbox"
+                        aria-checked={isDone}
                         onClick={() => handleToggleTask(act.id)}
-                        className={`p-4 rounded-xl border transition-all cursor-pointer select-none ${
+                        onKeyDown={(e) => {
+                          if (e.key === ' ' || e.key === 'Enter') {
+                            e.preventDefault();
+                            handleToggleTask(act.id);
+                          }
+                        }}
+                        className={`w-full text-left p-4 rounded-xl border transition-all cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                           isDone
                             ? 'bg-slate-50/70 border-slate-200 text-slate-400'
                             : 'bg-white border-slate-200 text-slate-800 hover:border-slate-300'
@@ -1405,7 +1480,7 @@ export const ComparisonPanel: React.FC = () => {
                             )}
                           </div>
                         </div>
-                      </div>
+                      </button>
                     );
                   })}
                 </div>

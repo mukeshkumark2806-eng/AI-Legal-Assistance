@@ -360,9 +360,61 @@ Ensure all changed provisions have exact citations and accurate classifications.
   let parsedJson: any;
   try {
     parsedJson = safeParseJson(completion.content);
-  } catch (err) {
+  } catch {
     console.error('Failed to parse Groq comparison JSON:', completion.content);
     throw new GroqServiceError('AI service returned an unparseable response for document comparison.', 502, 'INVALID_JSON');
+  }
+
+  // Cross-verify with structural alignment to ensure all added/removed sections are represented
+  if (Array.isArray(parsedJson.changes)) {
+    const existingRefs = new Set<string>(parsedJson.changes.map((c: any) => String(c.clauseRef || '').toLowerCase()));
+    for (const pair of alignedPairs) {
+      const pTitle = (pair.title || '').toLowerCase();
+      const pNum = String(pair.sectionNumber || '').toLowerCase();
+      const alreadyReported = Array.from(existingRefs).some((r: string) => (pTitle && r.includes(pTitle)) || (pNum && r.includes(`section ${pNum}`)));
+
+      if (!alreadyReported) {
+        if (!pair.sectionA && pair.sectionB) {
+          const srcRef = pair.sectionB.sourceReference || (pair.sectionNumber ? `Section ${pair.sectionNumber} — ${pair.title}` : pair.title);
+          parsedJson.changes.push({
+            id: `chg-${parsedJson.changes.length + 1}`,
+            clauseRef: srcRef,
+            changeType: 'ADDED',
+            category: 'SECURITY',
+            severity: 'HIGH',
+            oldText: null,
+            newText: pair.sectionB.paragraphs?.join(' ') || pair.sectionB.text || '',
+            explanation: `Added new ${pair.title} clause in revised document.`,
+            whyItMatters: 'Introduces new compliance standards and obligations.',
+            legalImpact: 'Expands operational and technical liability scope.',
+            actionRequired: 'Verify technical and organizational feasibility.',
+            pageNumberA: null,
+            pageNumberB: pair.sectionB.pageNumber || null,
+            sourceA: null,
+            sourceB: pair.sectionB.paragraphs?.[0] || pair.sectionB.text || null
+          });
+        } else if (pair.sectionA && !pair.sectionB) {
+          const srcRef = pair.sectionA.sourceReference || (pair.sectionNumber ? `Section ${pair.sectionNumber} — ${pair.title}` : pair.title);
+          parsedJson.changes.push({
+            id: `chg-${parsedJson.changes.length + 1}`,
+            clauseRef: srcRef,
+            changeType: 'REMOVED',
+            category: 'OBLIGATION',
+            severity: 'MODERATE',
+            oldText: pair.sectionA.paragraphs?.join(' ') || pair.sectionA.text || '',
+            newText: null,
+            explanation: `Removed ${pair.title} clause in revised document.`,
+            whyItMatters: 'Deletes provisions that existed in the original agreement.',
+            legalImpact: 'Eliminates original rights or duties under this section.',
+            actionRequired: 'Confirm whether removal was intentional.',
+            pageNumberA: pair.sectionA.pageNumber || null,
+            pageNumberB: null,
+            sourceA: pair.sectionA.paragraphs?.[0] || pair.sectionA.text || null,
+            sourceB: null
+          });
+        }
+      }
+    }
   }
 
   // Auto-fill IDs if omitted

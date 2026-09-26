@@ -59,7 +59,7 @@ export const App: React.FC = () => {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col">
+      <main id="main-content" className="flex-1 flex flex-col" tabIndex={-1}>
         {currentTab === 'dashboard' && (
           <Dashboard
             onAnalyzeClick={() => setIsUploadModalOpen(true)}

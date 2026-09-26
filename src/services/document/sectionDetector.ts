@@ -88,9 +88,9 @@ export function isAgreementOrDocumentTitle(text: string): boolean {
 
   // Strip section/article prefixes like "SECTION 1.0:", "Section 1 -", etc.
   const clean = trimmed
-    .replace(/^(?:SECTION|ARTICLE|CLAUSE)\s+[0-9IVXLCDM]+(?:\.[0-9]+)*[:\.\-\s]+/i, '')
-    .replace(/^[:\.\-\s]+/, '')
-    .replace(/[:\.\-]+$/, '')
+    .replace(/^(?:SECTION|ARTICLE|CLAUSE)\s+[0-9IVXLCDM]+(?:\.[0-9]+)*[:.\-\s]+/i, '')
+    .replace(/^[:.\-\s]+/, '')
+    .replace(/[:.-]+$/, '')
     .trim();
 
   if (!clean) return false;
@@ -115,7 +115,7 @@ export function isAgreementOrDocumentTitle(text: string): boolean {
     /^MEMORANDUM\s+OF\s+UNDERSTANDING$/i,
     /^LEGAL\s+SERVICES\s+AGREEMENT$/i,
     /^(?:VENDOR|SUPPLIER|CUSTOMER)\s+AGREEMENT$/i,
-    /^[A-Z0-9\s,\-\&'\(\)]+\s+(?:AGREEMENT|CONTRACT|STATEMENT\s+OF\s+WORK)$/i
+    /^[A-Z0-9\s,\-'()]+\s+(?:AGREEMENT|CONTRACT|STATEMENT\s+OF\s+WORK)$/i
   ];
 
   return titlePatterns.some(pattern => pattern.test(clean));
@@ -128,8 +128,8 @@ export function isVersionLabel(text: string): boolean {
   if (!text) return false;
   const clean = text.trim();
   return (
-    /^Version\s+[0-9]+(?:\.[0-9]+)*(?:\s*[\u2013\u2014\-]\s*.*)?$/i.test(clean) ||
-    /^v(?:er)?\.?\s*[0-9]+(?:\.[0-9]+)*(?:\s*[\u2013\u2014\-]\s*.*)?$/i.test(clean) ||
+    /^Version\s+[0-9]+(?:\.[0-9]+)*(?:\s*[\u2013\u2014-]\s*.*)?$/i.test(clean) ||
+    /^v(?:er)?\.?\s*[0-9]+(?:\.[0-9]+)*(?:\s*[\u2013\u2014-]\s*.*)?$/i.test(clean) ||
     /^Draft\s+(?:v(?:er)?\.?\s*)?[0-9]+(?:\.[0-9]+)*.*$/i.test(clean)
   );
 }
@@ -179,11 +179,11 @@ export function identifyHeading(line: string): DetectedHeading | null {
   }
 
   // 1. Explicit prefix: "SECTION 1.0", "Section 2: Term", "ARTICLE III - INDEMNIFICATION", "Clause 4.1"
-  const prefixRegex = /^(?:SECTION|ARTICLE|CLAUSE|ITEM|PART|SCHEDULE)\s+([0-9IVXLCDM]+(?:\.[0-9]+)*)[:\.\-\s]+(.+)$/i;
+  const prefixRegex = /^(?:SECTION|ARTICLE|CLAUSE|ITEM|PART|SCHEDULE)\s+([0-9IVXLCDM]+(?:\.[0-9]+)*)[:.\-\s]+(.+)$/i;
   const prefixMatch = trimmed.match(prefixRegex);
   if (prefixMatch) {
     const rawNumber = prefixMatch[1].trim();
-    const rawTitle = prefixMatch[2].replace(/^[:\.\-\s]+/, '').trim();
+    const rawTitle = prefixMatch[2].replace(/^[:.\-\s]+/, '').trim();
 
     // If the title after "SECTION 1.0:" is an agreement title (e.g. "SECTION 1.0: Service Agreement"), reject as section
     if (isAgreementOrDocumentTitle(rawTitle)) {
@@ -243,7 +243,7 @@ export function identifyHeading(line: string): DetectedHeading | null {
   }
 
   // 4. Named legal headings: exact match or line matches keyword
-  const upper = trimmed.toUpperCase().replace(/[:\.\-]+$/, '').trim();
+  const upper = trimmed.toUpperCase().replace(/[:.-]+$/, '').trim();
   for (const keyword of LEGAL_SECTION_KEYWORDS) {
     if (upper === keyword || upper === `SECTION: ${keyword}` || upper === `ARTICLE: ${keyword}`) {
       return {
@@ -360,7 +360,7 @@ export function detectSections(
     // Process document-level metadata / title / headers before the first contractual section starts
     if (!hasFoundFirstContractualSection) {
       if (isAgreementOrDocumentTitle(line)) {
-        documentMetadata.documentTitle = line.replace(/^(?:SECTION|ARTICLE)\s+[0-9IVXLCDM]+(?:\.[0-9]+)*[:\.\-\s]+/i, '').trim();
+        documentMetadata.documentTitle = line.replace(/^(?:SECTION|ARTICLE)\s+[0-9IVXLCDM]+(?:\.[0-9]+)*[:.\-\s]+/i, '').trim();
         documentMetadata.headerLines.push(line);
         continue;
       }

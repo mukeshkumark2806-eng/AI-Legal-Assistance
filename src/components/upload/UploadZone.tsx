@@ -8,18 +8,12 @@ import {
   ArrowRight, 
   CheckCircle2, 
   Circle,
-  Clock,
-  Cpu,
   FileCheck, 
   FileText, 
   FileUp, 
-  HelpCircle, 
   Info, 
-  Layers, 
-  Lock, 
   RefreshCw, 
-  ShieldAlert,
-  ShieldCheck,
+  ShieldCheck, 
   Sparkles, 
   Upload, 
   X 
@@ -186,36 +180,55 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
 
   return (
     <div className="w-full">
-      {/* Hidden File Input */}
+      {/* Hidden File Input with Accessible Label */}
       <input
         type="file"
+        id="legal-document-upload-input"
         ref={fileInputRef}
         onChange={handleFileChange}
         accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        className="hidden"
+        className="sr-only"
+        aria-label="Upload PDF or Word (DOCX) legal document"
       />
+
+      {/* Live Region for Screen Readers */}
+      <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {selectedFile && isAnalyzingAi && `Analyzing ${selectedFile.name}: ${aiStageText}`}
+        {selectedFile && !isAnalyzingAi && analyzedDoc && `Document analysis complete for ${selectedFile.name}.`}
+        {selectedFile && errorMessage && `Document extraction error: ${errorMessage}`}
+        {selectedFile && aiErrorMessage && `Document analysis notice: ${aiErrorMessage}`}
+      </div>
 
       {/* STATE 1: Empty Drop Zone */}
       {!selectedFile ? (
         <div
+          role="button"
+          tabIndex={0}
+          aria-label="Document upload area: drag and drop PDF or DOCX file, or press Enter to browse files"
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          className={`border-2 border-dashed rounded-2xl transition-all text-center flex flex-col items-center justify-center cursor-pointer ${
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              fileInputRef.current?.click();
+            }
+          }}
+          className={`border-2 border-dashed rounded-2xl transition-all text-center flex flex-col items-center justify-center cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:border-indigo-500 ${
             isDragging
               ? 'border-indigo-600 bg-indigo-50/70 scale-[1.005]'
               : 'border-slate-300 hover:border-slate-400 bg-slate-50/50 hover:bg-slate-50'
           } ${isCompact ? 'p-6' : 'p-10 sm:p-14'}`}
           onClick={() => fileInputRef.current?.click()}
         >
-          <div className="w-14 h-14 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-center mb-4 text-indigo-600 group-hover:scale-105 transition-transform">
+          <div className="w-14 h-14 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-center mb-4 text-indigo-600 group-hover:scale-105 transition-transform" aria-hidden="true">
             <FileUp className="w-7 h-7" />
           </div>
 
           <h3 className="text-lg font-semibold text-slate-900 tracking-tight">
             Analyze a legal document
           </h3>
-          <p className="text-sm text-slate-500 max-w-md mt-1.5 leading-relaxed">
+          <p className="text-sm text-slate-600 max-w-md mt-1.5 leading-relaxed">
             Upload an agreement, contract, policy, notice, or other legal document for real-time text extraction and structured document analysis.
           </p>
 
@@ -229,25 +242,26 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
                 e.stopPropagation();
                 fileInputRef.current?.click();
               }}
+              aria-label="Browse files from your computer"
             >
               Browse files
             </Button>
-            <span className="text-xs text-slate-400 font-medium">or drag & drop here</span>
+            <span className="text-xs text-slate-500 font-medium">or drag & drop here</span>
           </div>
 
           {/* Format & Size Requirements */}
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-xs text-slate-500">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-xs text-slate-600">
             <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-white border border-slate-200 font-medium text-slate-700">
               PDF
             </span>
             <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-white border border-slate-200 font-medium text-slate-700">
               DOCX
             </span>
-            <span className="text-slate-400">•</span>
+            <span className="text-slate-400" aria-hidden="true">•</span>
             <span>Up to 25 MB max file size</span>
-            <span className="text-slate-400">•</span>
-            <span className="inline-flex items-center gap-1 text-slate-500">
-              <Sparkles className="w-3 h-3 text-indigo-600" /> Analysis Active
+            <span className="text-slate-400" aria-hidden="true">•</span>
+            <span className="inline-flex items-center gap-1 text-slate-600">
+              <Sparkles className="w-3 h-3 text-indigo-600" aria-hidden="true" /> Analysis Active
             </span>
           </div>
         </div>
@@ -281,11 +295,13 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
             </div>
 
             <button
+              type="button"
               onClick={handleReset}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              aria-label="Cancel and choose another file"
               title="Cancel and choose another file"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
 
@@ -369,9 +385,9 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
 
           {/* AI ERROR ALERT: Missing API Key / Server Offline / Rate Limit */}
           {aiErrorMessage && (
-            <div className="p-4 rounded-xl border border-rose-200 bg-rose-50/80 text-xs space-y-2.5 text-rose-950">
+            <div role="alert" aria-live="assertive" className="p-4 rounded-xl border border-rose-200 bg-rose-50/80 text-xs space-y-2.5 text-rose-950">
               <div className="flex items-start gap-2">
-                <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" aria-hidden="true" />
                 <div>
                   <h5 className="font-bold text-rose-900">Document Analysis Notice</h5>
                   <p className="mt-0.5 leading-relaxed text-[11px] text-rose-800">{aiErrorMessage}</p>
@@ -385,6 +401,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
                     size="sm"
                     onClick={() => executeAiAnalysis(extractedDoc)}
                     icon={<RefreshCw className="w-3.5 h-3.5" />}
+                    aria-label="Retry AI Analysis"
                   >
                     Retry Analysis
                   </Button>
@@ -395,6 +412,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
                   onClick={handleLaunchWorkspace}
                   icon={<ArrowRight className="w-3.5 h-3.5" />}
                   iconPosition="right"
+                  aria-label="Open extracted text in workspace"
                 >
                   Open Extracted Text in Workspace
                 </Button>
@@ -404,16 +422,16 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
 
           {/* EXTRACTION ERROR ALERT: Corrupted / Unsupported / Oversized / Scanned PDF */}
           {errorMessage && (
-            <div className={`p-4 rounded-xl border text-xs space-y-2 ${
+            <div role="alert" aria-live="assertive" className={`p-4 rounded-xl border text-xs space-y-2 ${
               isOcrAlert 
                 ? 'bg-amber-50/80 border-amber-200 text-amber-900' 
                 : 'bg-rose-50/80 border-rose-200 text-rose-900'
             }`}>
               <div className="flex items-start gap-2">
                 {isOcrAlert ? (
-                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" aria-hidden="true" />
                 ) : (
-                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" aria-hidden="true" />
                 )}
                 <div>
                   <h5 className="font-bold">
@@ -424,7 +442,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
               </div>
 
               <div className="pt-1 flex items-center justify-end">
-                <Button variant="outline" size="sm" onClick={handleReset}>
+                <Button variant="outline" size="sm" onClick={handleReset} aria-label="Try another document">
                   Try another document
                 </Button>
               </div>

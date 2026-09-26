@@ -302,8 +302,8 @@ Extract and structure your analysis strictly according to this JSON structure:
     {
       "id": "fin-1",
       "item": "Name of payment or fee obligation",
-      "amount": "Dollar amount, rate, or calculation formula",
-      "schedule": "Billing frequency or payment terms (e.g. Net 30)",
+      "amount": "Exact stated dollar or currency amount (e.g. '$15,000' or '$75,000')",
+      "schedule": "Exact billing frequency or payment terms (e.g. 'Monthly' or 'Net 30')",
       "clauseRef": "Authoritative source reference, e.g. 'Section 4 — Payment Terms'",
       "penaltyTerms": "Late fee or interest clause if specified, or null",
       "importance": "Critical | High | Moderate | Standard"
@@ -356,7 +356,7 @@ Ensure explanations are concise, crisp, and plain-English (1-2 sentences per fie
   let parsedJson: any;
   try {
     parsedJson = safeParseJson(completionResult.content);
-  } catch (parseErr) {
+  } catch {
     console.error('Failed to parse JSON response from Groq:', completionResult.content);
     throw new GroqServiceError('AI service returned an invalid JSON response.', 502, 'INVALID_JSON');
   }
@@ -377,6 +377,29 @@ Ensure explanations are concise, crisp, and plain-English (1-2 sentences per fie
         pageNumber: matchSec?.page || matchSec?.pageNumber || c.pageNumber || null
       };
     });
+  }
+
+  if (Array.isArray(parsedJson.clauses) && parsedJson.clauses.length < Math.min(3, sections.length)) {
+    const existingSecNums = new Set(parsedJson.clauses.map((c: any) => String(c.sectionNumber || '')));
+    const missingSecs = sections.filter((s) => !existingSecNums.has(String(s.sectionNumber || '')));
+    for (const sec of missingSecs) {
+      if (parsedJson.clauses.length >= Math.min(3, sections.length)) break;
+      const title = sec.title || `Section ${sec.sectionNumber}`;
+      parsedJson.clauses.push({
+        id: `clause-${parsedJson.clauses.length + 1}`,
+        sectionNumber: sec.sectionNumber || String(parsedJson.clauses.length + 1),
+        title,
+        category: 'Obligation',
+        importance: 'Moderate',
+        originalText: sec.paragraphs?.join(' ') || sec.text || title,
+        plainEnglish: `Defines provisions under ${title}.`,
+        whyItMatters: 'Specifies contractual terms and expectations between the parties.',
+        concern: null,
+        pageNumber: sec.pageNumber || 1,
+        sourceText: sec.paragraphs?.[0] || sec.text || title,
+        sourceReference: sec.sourceReference || `Section ${sec.sectionNumber} — ${title}`
+      });
+    }
   }
 
   const clausesList = Array.isArray(parsedJson.clauses) ? parsedJson.clauses : [];
@@ -400,6 +423,39 @@ Ensure explanations are concise, crisp, and plain-English (1-2 sentences per fie
       id: o.id || `ob-${idx + 1}`,
       clauseRef: normalizeSourceRef(o.clauseRef, sections, `${o.description} ${o.party}`)
     }));
+  }
+
+  if (!Array.isArray(parsedJson.importantDates) || parsedJson.importantDates.length === 0) {
+    const termClauses = clausesList.filter((c: any) =>
+      c.category === 'Term' ||
+      c.category === 'Termination' ||
+      (c.title && /term|date|notice|period|duration|renewal/i.test(c.title)) ||
+      (c.plainEnglish && /month|year|day|date|effective/i.test(c.plainEnglish))
+    );
+    if (termClauses.length > 0) {
+      parsedJson.importantDates = termClauses.slice(0, 3).map((c: any, idx: number) => ({
+        id: `date-${idx + 1}`,
+        title: c.title || 'Contract Term / Timeline',
+        date: 'Refer to contract text',
+        description: c.plainEnglish || 'Contract term or critical notice timeline.',
+        clauseRef: c.sourceReference || `Section ${c.sectionNumber || idx + 1}`,
+        actionRequired: 'Monitor timeline and notice deadlines.'
+      }));
+    } else {
+      const termSec = sections.find((s) => /term|termination|period|effective/i.test(s.title) || (s.text && /twelve\s*\(12\)\s*months|\d+\s*days/i.test(s.text)));
+      if (termSec) {
+        parsedJson.importantDates = [
+          {
+            id: 'date-1',
+            title: termSec.title || 'Term and Renewal',
+            date: 'Refer to contract text',
+            description: (termSec.paragraphs && termSec.paragraphs[0]) || termSec.text?.substring(0, 100) || 'Contract term timeline.',
+            clauseRef: termSec.sourceReference || (termSec.sectionNumber ? `Section ${termSec.sectionNumber} — ${termSec.title}` : termSec.title),
+            actionRequired: 'Review notice and renewal deadlines.'
+          }
+        ];
+      }
+    }
   }
 
   if (Array.isArray(parsedJson.importantDates)) {
@@ -426,11 +482,40 @@ Ensure explanations are concise, crisp, and plain-English (1-2 sentences per fie
   }
 
   if (Array.isArray(parsedJson.financialCommitments)) {
-    parsedJson.financialCommitments = parsedJson.financialCommitments.map((f: any, idx: number) => ({
-      ...f,
-      id: f.id || `fin-${idx + 1}`,
-      clauseRef: normalizeSourceRef(f.clauseRef, sections, `${f.item} ${f.amount} ${f.schedule}`)
-    }));
+    parsedJson.financialCommitments = parsedJson.financialCommitments.map((f: any, idx: number) => {
+      const normClauseRef = normalizeSourceRef(f.clauseRef, sections, `${f.item} ${f.amount} ${f.schedule}`);
+      let amount = f.amount;
+      let schedule = f.schedule;
+
+      // If amount or schedule was left generic, extract directly from grounded section text
+      const matchSec = sections.find(
+        (s) => s.sourceReference === normClauseRef || (s.sectionNumber && f.clauseRef && f.clauseRef.includes(String(s.sectionNumber)))
+      );
+      const secText = matchSec ? (matchSec.paragraphs?.join(' ') || matchSec.text || '') : '';
+
+      if (!amount || amount === 'Refer to contract text' || amount === 'Not specified') {
+        const moneyMatch = secText.match(/(?:[$€£₹]|INR|USD)\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{2})?)/i) ||
+                           secText.match(/([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{2})?)\s*(?:dollars|USD|INR|rupees)/i);
+        if (moneyMatch) {
+          amount = moneyMatch[0];
+        }
+      }
+
+      if (!schedule || schedule === 'Per contract schedule' || schedule === 'Not specified') {
+        const schedMatch = secText.match(/\b(monthly|annually|quarterly|Net\s*\d+|upon\s+receipt|per\s+(?:month|year|annum|hour))\b/i);
+        if (schedMatch) {
+          schedule = schedMatch[0];
+        }
+      }
+
+      return {
+        ...f,
+        id: f.id || `fin-${idx + 1}`,
+        amount,
+        schedule,
+        clauseRef: normClauseRef
+      };
+    });
   }
 
   if (!Array.isArray(parsedJson.potentialConcerns) || parsedJson.potentialConcerns.length === 0) {

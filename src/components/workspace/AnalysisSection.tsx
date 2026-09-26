@@ -11,14 +11,10 @@ import {
   Clock, 
   Cpu, 
   CreditCard, 
-  Database, 
   FileCheck2, 
-  FileText, 
   HelpCircle, 
-  Info, 
   Layers, 
   Scale, 
-  ShieldAlert, 
   ShieldCheck, 
   Sparkles 
 } from 'lucide-react';
@@ -52,26 +48,6 @@ export const AnalysisSection: React.FC<AnalysisSectionProps> = ({
 
   const isUploadedDoc = doc.isUploaded || doc.source === 'uploaded';
   const analysis = doc.analysis;
-
-  // For uploaded documents: deterministic keyword check
-  const legalTopicKeywords = [
-    { topic: 'Termination & Cancellation', terms: ['terminate', 'cancellation', 'convenience', 'cure period'] },
-    { topic: 'Payment & Compensation', terms: ['fee', 'payment', 'invoic', 'due date', 'penalty', 'interest'] },
-    { topic: 'Confidentiality & Non-Disclosure', terms: ['confidential', 'proprietary', 'non-disclosure', 'trade secret'] },
-    { topic: 'Indemnification & Liability', terms: ['indemnif', 'hold harmless', 'liability', 'damages', 'consequential'] },
-    { topic: 'Governing Law & Dispute Resolution', terms: ['governing law', 'jurisdiction', 'arbitration', 'dispute'] }
-  ];
-
-  const matchedTopics = isUploadedDoc && doc.rawText
-    ? legalTopicKeywords.map((kt) => {
-        const matches = kt.terms.filter((t) => doc.rawText?.toLowerCase().includes(t));
-        return {
-          topic: kt.topic,
-          detected: matches.length > 0,
-          termsFound: matches
-        };
-      })
-    : [];
 
   // IF REAL UPLOADED DOCUMENT AND NOT YET ANALYZED WITH AI: Show extraction status with trigger button
   if (isUploadedDoc && !doc.isAiAnalyzed) {
@@ -110,10 +86,12 @@ export const AnalysisSection: React.FC<AnalysisSectionProps> = ({
             <button
               type="button"
               onClick={onTriggerAiAnalysis}
-              className="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+              disabled={isAnalyzing}
+              aria-label={isAnalyzing ? 'Analyzing Document with LegalLens...' : 'Analyze Document with LegalLens'}
+              className="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 disabled:cursor-not-allowed text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
             >
-              <Cpu className="w-4 h-4" />
-              <span>Analyze Document with LegalLens</span>
+              <Cpu className={`w-4 h-4 ${isAnalyzing ? 'animate-spin' : ''}`} aria-hidden="true" />
+              <span>{isAnalyzing ? 'Analyzing Document...' : 'Analyze Document with LegalLens'}</span>
             </button>
           )}
         </div>
@@ -122,19 +100,20 @@ export const AnalysisSection: React.FC<AnalysisSectionProps> = ({
         <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs space-y-3">
           <div className="flex items-center justify-between pb-2 border-b border-slate-100">
             <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-indigo-600" />
+              <Layers className="w-3.5 h-3.5 text-indigo-600" aria-hidden="true" />
               <span>Extracted Section Hierarchy ({doc.sections.length})</span>
             </h4>
-            <span className="text-[10px] font-mono text-slate-400">Click to inspect</span>
+            <span className="text-[10px] font-mono text-slate-500">Click to inspect</span>
           </div>
 
-          <div className="space-y-1.5 max-h-60 overflow-y-auto pr-1">
+          <div role="list" aria-label="Extracted sections" className="space-y-1.5 max-h-60 overflow-y-auto pr-1">
             {doc.sections.map((sec) => (
               <button
                 key={sec.id}
                 type="button"
                 onClick={() => onJumpToClause(sec.sourceReference || (sec.sectionNumber ? `Section ${sec.sectionNumber} — ${sec.title}` : sec.title))}
-                className="w-full text-left p-2 rounded-lg bg-slate-50 hover:bg-indigo-50/50 border border-slate-200/60 hover:border-indigo-200 transition-colors flex items-center justify-between text-xs cursor-pointer group"
+                aria-label={`Jump to section ${sec.sectionNumber ? sec.sectionNumber + ': ' : ''}${sec.title}`}
+                className="w-full text-left p-2 rounded-lg bg-slate-50 hover:bg-indigo-50/50 border border-slate-200/60 hover:border-indigo-200 transition-colors flex items-center justify-between text-xs cursor-pointer group focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
               >
                 <div className="flex items-center gap-2 truncate pr-2">
                   {sec.sectionNumber && (
@@ -200,22 +179,25 @@ export const AnalysisSection: React.FC<AnalysisSectionProps> = ({
       <div className="bg-white border border-slate-200/90 rounded-xl overflow-hidden shadow-xs">
         <button
           type="button"
+          id="accordion-btn-overview"
+          aria-expanded={openSections.overview}
+          aria-controls="accordion-section-overview"
           onClick={() => toggleSection('overview')}
-          className="w-full px-4 py-3.5 bg-slate-50/60 border-b border-slate-100 flex items-center justify-between text-left cursor-pointer hover:bg-slate-50 transition-colors"
+          className="w-full px-4 py-3.5 bg-slate-50/60 border-b border-slate-100 flex items-center justify-between text-left cursor-pointer hover:bg-slate-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
           <div className="flex items-center gap-2.5">
             <div className="w-6 h-6 rounded-md bg-indigo-100 text-indigo-700 flex items-center justify-center">
-              <FileCheck2 className="w-3.5 h-3.5" />
+              <FileCheck2 className="w-3.5 h-3.5" aria-hidden="true" />
             </div>
             <h3 className="text-sm font-bold text-slate-900">Document Overview</h3>
           </div>
-          {openSections.overview ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+          {openSections.overview ? <ChevronUp className="w-4 h-4 text-slate-500" aria-hidden="true" /> : <ChevronDown className="w-4 h-4 text-slate-500" aria-hidden="true" />}
         </button>
 
         {openSections.overview && (
-          <div className="p-4 space-y-3.5">
+          <div id="accordion-section-overview" role="region" aria-labelledby="accordion-btn-overview" className="p-4 space-y-3.5">
             <div>
-              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">
+              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">
                 Executive Summary
               </span>
               <p className="text-xs text-slate-700 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">
@@ -225,19 +207,19 @@ export const AnalysisSection: React.FC<AnalysisSectionProps> = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
               <div className="p-2.5 rounded-lg border border-slate-100 bg-white">
-                <span className="text-slate-400 text-[10px] block">Agreement Type</span>
+                <span className="text-slate-500 text-[10px] block">Agreement Type</span>
                 <span className="font-semibold text-slate-800">{analysis.overview.documentType}</span>
               </div>
               <div className="p-2.5 rounded-lg border border-slate-100 bg-white">
-                <span className="text-slate-400 text-[10px] block">Effective Date</span>
+                <span className="text-slate-500 text-[10px] block">Effective Date</span>
                 <span className="font-semibold text-slate-800">{analysis.overview.effectiveDate}</span>
               </div>
               <div className="p-2.5 rounded-lg border border-slate-100 bg-white">
-                <span className="text-slate-400 text-[10px] block">Term Commitment</span>
+                <span className="text-slate-500 text-[10px] block">Term Commitment</span>
                 <span className="font-semibold text-slate-800">{analysis.overview.termLength}</span>
               </div>
               <div className="p-2.5 rounded-lg border border-slate-100 bg-white">
-                <span className="text-slate-400 text-[10px] block">Governing Law</span>
+                <span className="text-slate-500 text-[10px] block">Governing Law</span>
                 <span className="font-semibold text-slate-800">{analysis.overview.governingLaw}</span>
               </div>
             </div>
@@ -249,12 +231,15 @@ export const AnalysisSection: React.FC<AnalysisSectionProps> = ({
       <div className="bg-white border border-slate-200/90 rounded-xl overflow-hidden shadow-xs">
         <button
           type="button"
+          id="accordion-btn-obligations"
+          aria-expanded={openSections.obligations}
+          aria-controls="accordion-section-obligations"
           onClick={() => toggleSection('obligations')}
-          className="w-full px-4 py-3.5 bg-slate-50/60 border-b border-slate-100 flex items-center justify-between text-left cursor-pointer hover:bg-slate-50 transition-colors"
+          className="w-full px-4 py-3.5 bg-slate-50/60 border-b border-slate-100 flex items-center justify-between text-left cursor-pointer hover:bg-slate-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
           <div className="flex items-center gap-2.5">
             <div className="w-6 h-6 rounded-md bg-blue-100 text-blue-700 flex items-center justify-center">
-              <Scale className="w-3.5 h-3.5" />
+              <Scale className="w-3.5 h-3.5" aria-hidden="true" />
             </div>
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-bold text-slate-900">Key Obligations</h3>
@@ -263,11 +248,11 @@ export const AnalysisSection: React.FC<AnalysisSectionProps> = ({
               </span>
             </div>
           </div>
-          {openSections.obligations ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+          {openSections.obligations ? <ChevronUp className="w-4 h-4 text-slate-500" aria-hidden="true" /> : <ChevronDown className="w-4 h-4 text-slate-500" aria-hidden="true" />}
         </button>
 
         {openSections.obligations && (
-          <div className="p-4 space-y-2.5">
+          <div id="accordion-section-obligations" role="region" aria-labelledby="accordion-btn-obligations" className="p-4 space-y-2.5">
             {analysis.keyObligations.map((item) => (
               <div
                 key={item.id}
@@ -284,19 +269,20 @@ export const AnalysisSection: React.FC<AnalysisSectionProps> = ({
                 <p className="text-slate-700 leading-relaxed">{item.description}</p>
                 {item.deadline && (
                   <div className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-amber-800 bg-amber-50 px-2 py-1 rounded">
-                    <Clock className="w-3 h-3 text-amber-600" />
+                    <Clock className="w-3 h-3 text-amber-600" aria-hidden="true" />
                     <span>Cutoff: {item.deadline}</span>
                   </div>
                 )}
                 <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                  <span className="text-slate-400 font-mono">{item.clauseRef}</span>
+                  <span className="text-slate-500 font-mono">{item.clauseRef}</span>
                   <button
                     type="button"
                     onClick={() => onJumpToClause(item.clauseRef)}
-                    className="text-indigo-600 hover:text-indigo-800 font-medium inline-flex items-center gap-0.5 cursor-pointer"
+                    aria-label={`Inspect ${item.party} obligation in ${item.clauseRef}`}
+                    className="text-indigo-600 hover:text-indigo-800 font-medium inline-flex items-center gap-0.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded p-0.5"
                   >
                     <span>Inspect</span>
-                    <ArrowRight className="w-3 h-3" />
+                    <ArrowRight className="w-3 h-3" aria-hidden="true" />
                   </button>
                 </div>
               </div>
@@ -309,12 +295,15 @@ export const AnalysisSection: React.FC<AnalysisSectionProps> = ({
       <div className="bg-white border border-slate-200/90 rounded-xl overflow-hidden shadow-xs">
         <button
           type="button"
+          id="accordion-btn-dates"
+          aria-expanded={openSections.dates}
+          aria-controls="accordion-section-dates"
           onClick={() => toggleSection('dates')}
-          className="w-full px-4 py-3.5 bg-slate-50/60 border-b border-slate-100 flex items-center justify-between text-left cursor-pointer hover:bg-slate-50 transition-colors"
+          className="w-full px-4 py-3.5 bg-slate-50/60 border-b border-slate-100 flex items-center justify-between text-left cursor-pointer hover:bg-slate-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
           <div className="flex items-center gap-2.5">
             <div className="w-6 h-6 rounded-md bg-amber-100 text-amber-700 flex items-center justify-center">
-              <Calendar className="w-3.5 h-3.5" />
+              <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
             </div>
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-bold text-slate-900">Important Dates</h3>
@@ -323,11 +312,11 @@ export const AnalysisSection: React.FC<AnalysisSectionProps> = ({
               </span>
             </div>
           </div>
-          {openSections.dates ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+          {openSections.dates ? <ChevronUp className="w-4 h-4 text-slate-500" aria-hidden="true" /> : <ChevronDown className="w-4 h-4 text-slate-500" aria-hidden="true" />}
         </button>
 
         {openSections.dates && (
-          <div className="p-4 space-y-2.5">
+          <div id="accordion-section-dates" role="region" aria-labelledby="accordion-btn-dates" className="p-4 space-y-2.5">
             {analysis.importantDates.map((d) => (
               <div
                 key={d.id}
@@ -335,10 +324,10 @@ export const AnalysisSection: React.FC<AnalysisSectionProps> = ({
               >
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-slate-900">{d.title}</span>
-                  <span className="font-mono text-[10px] text-slate-400">{d.clauseRef}</span>
+                  <span className="font-mono text-[10px] text-slate-500">{d.clauseRef}</span>
                 </div>
                 <div className="flex items-center gap-2 text-indigo-700 font-semibold mt-0.5">
-                  <Calendar className="w-3.5 h-3.5" />
+                  <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
                   <span>{d.date}</span>
                 </div>
                 <p className="text-slate-600 text-[11px] leading-relaxed mt-1">{d.description}</p>
@@ -352,12 +341,15 @@ export const AnalysisSection: React.FC<AnalysisSectionProps> = ({
       <div className="bg-white border border-slate-200/90 rounded-xl overflow-hidden shadow-xs">
         <button
           type="button"
+          id="accordion-btn-financials"
+          aria-expanded={openSections.financials}
+          aria-controls="accordion-section-financials"
           onClick={() => toggleSection('financials')}
-          className="w-full px-4 py-3.5 bg-slate-50/60 border-b border-slate-100 flex items-center justify-between text-left cursor-pointer hover:bg-slate-50 transition-colors"
+          className="w-full px-4 py-3.5 bg-slate-50/60 border-b border-slate-100 flex items-center justify-between text-left cursor-pointer hover:bg-slate-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
           <div className="flex items-center gap-2.5">
             <div className="w-6 h-6 rounded-md bg-emerald-100 text-emerald-700 flex items-center justify-center">
-              <CreditCard className="w-3.5 h-3.5" />
+              <CreditCard className="w-3.5 h-3.5" aria-hidden="true" />
             </div>
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-bold text-slate-900">Financial Commitments</h3>
@@ -366,11 +358,11 @@ export const AnalysisSection: React.FC<AnalysisSectionProps> = ({
               </span>
             </div>
           </div>
-          {openSections.financials ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+          {openSections.financials ? <ChevronUp className="w-4 h-4 text-slate-500" aria-hidden="true" /> : <ChevronDown className="w-4 h-4 text-slate-500" aria-hidden="true" />}
         </button>
 
         {openSections.financials && (
-          <div className="p-4 space-y-2.5">
+          <div id="accordion-section-financials" role="region" aria-labelledby="accordion-btn-financials" className="p-4 space-y-2.5">
             {analysis.financialCommitments.map((fin) => (
               <div
                 key={fin.id}
@@ -379,7 +371,7 @@ export const AnalysisSection: React.FC<AnalysisSectionProps> = ({
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <h4 className="font-semibold text-slate-900">{fin.item}</h4>
-                    <p className="text-slate-500 text-[11px] mt-0.5">{fin.schedule}</p>
+                    <p className="text-slate-600 text-[11px] mt-0.5">{fin.schedule}</p>
                   </div>
                   <span className="text-xs font-bold font-mono text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
                     {fin.amount}
@@ -391,11 +383,12 @@ export const AnalysisSection: React.FC<AnalysisSectionProps> = ({
                   </div>
                 )}
                 <div className="mt-2 flex items-center justify-between text-[11px] pt-1 border-t border-slate-100">
-                  <span className="text-slate-400 font-mono">{fin.clauseRef}</span>
+                  <span className="text-slate-500 font-mono">{fin.clauseRef}</span>
                   <button
                     type="button"
                     onClick={() => onJumpToClause(fin.clauseRef)}
-                    className="text-indigo-600 hover:text-indigo-800 font-medium cursor-pointer"
+                    aria-label={`View clause for ${fin.item} (${fin.clauseRef})`}
+                    className="text-indigo-600 hover:text-indigo-800 font-medium cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded p-0.5"
                   >
                     View Clause
                   </button>
@@ -410,12 +403,15 @@ export const AnalysisSection: React.FC<AnalysisSectionProps> = ({
       <div className="bg-white border border-slate-200/90 rounded-xl overflow-hidden shadow-xs">
         <button
           type="button"
+          id="accordion-btn-concerns"
+          aria-expanded={openSections.concerns}
+          aria-controls="accordion-section-concerns"
           onClick={() => toggleSection('concerns')}
-          className="w-full px-4 py-3.5 bg-slate-50/60 border-b border-slate-100 flex items-center justify-between text-left cursor-pointer hover:bg-slate-50 transition-colors"
+          className="w-full px-4 py-3.5 bg-slate-50/60 border-b border-slate-100 flex items-center justify-between text-left cursor-pointer hover:bg-slate-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
           <div className="flex items-center gap-2.5">
             <div className="w-6 h-6 rounded-md bg-rose-100 text-rose-700 flex items-center justify-center">
-              <AlertTriangle className="w-3.5 h-3.5" />
+              <AlertTriangle className="w-3.5 h-3.5" aria-hidden="true" />
             </div>
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-bold text-slate-900">Potential Concerns</h3>
@@ -424,11 +420,11 @@ export const AnalysisSection: React.FC<AnalysisSectionProps> = ({
               </span>
             </div>
           </div>
-          {openSections.concerns ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+          {openSections.concerns ? <ChevronUp className="w-4 h-4 text-slate-500" aria-hidden="true" /> : <ChevronDown className="w-4 h-4 text-slate-500" aria-hidden="true" />}
         </button>
 
         {openSections.concerns && (
-          <div className="p-4 space-y-3">
+          <div id="accordion-section-concerns" role="region" aria-labelledby="accordion-btn-concerns" className="p-4 space-y-3">
             {analysis.potentialConcerns.map((concern) => (
               <div
                 key={concern.id}
@@ -436,7 +432,7 @@ export const AnalysisSection: React.FC<AnalysisSectionProps> = ({
               >
                 <div className="flex items-start justify-between gap-2">
                   <h4 className="font-semibold text-rose-950 flex items-center gap-1.5">
-                    <AlertOctagon className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                    <AlertOctagon className="w-3.5 h-3.5 text-rose-600 shrink-0" aria-hidden="true" />
                     <span>{concern.title}</span>
                   </h4>
                   <ImportanceBadge level={concern.severity} size="sm" />
@@ -447,11 +443,12 @@ export const AnalysisSection: React.FC<AnalysisSectionProps> = ({
                   {concern.mitigationAdvice}
                 </div>
                 <div className="flex items-center justify-between text-[11px] pt-1">
-                  <span className="text-slate-400 font-mono">{concern.clauseRef}</span>
+                  <span className="text-slate-500 font-mono">{concern.clauseRef}</span>
                   <button
                     type="button"
                     onClick={() => onJumpToClause(concern.clauseRef)}
-                    className="text-rose-700 hover:text-rose-900 font-semibold cursor-pointer"
+                    aria-label={`Inspect concern ${concern.title} in document (${concern.clauseRef})`}
+                    className="text-rose-700 hover:text-rose-900 font-semibold cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 rounded p-0.5"
                   >
                     Inspect in Document
                   </button>
@@ -466,12 +463,15 @@ export const AnalysisSection: React.FC<AnalysisSectionProps> = ({
       <div className="bg-white border border-slate-200/90 rounded-xl overflow-hidden shadow-xs">
         <button
           type="button"
+          id="accordion-btn-questions"
+          aria-expanded={openSections.questions}
+          aria-controls="accordion-section-questions"
           onClick={() => toggleSection('questions')}
-          className="w-full px-4 py-3.5 bg-slate-50/60 border-b border-slate-100 flex items-center justify-between text-left cursor-pointer hover:bg-slate-50 transition-colors"
+          className="w-full px-4 py-3.5 bg-slate-50/60 border-b border-slate-100 flex items-center justify-between text-left cursor-pointer hover:bg-slate-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
           <div className="flex items-center gap-2.5">
             <div className="w-6 h-6 rounded-md bg-purple-100 text-purple-700 flex items-center justify-center">
-              <HelpCircle className="w-3.5 h-3.5" />
+              <HelpCircle className="w-3.5 h-3.5" aria-hidden="true" />
             </div>
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-bold text-slate-900">Questions to Consider</h3>
@@ -480,11 +480,11 @@ export const AnalysisSection: React.FC<AnalysisSectionProps> = ({
               </span>
             </div>
           </div>
-          {openSections.questions ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+          {openSections.questions ? <ChevronUp className="w-4 h-4 text-slate-500" aria-hidden="true" /> : <ChevronDown className="w-4 h-4 text-slate-500" aria-hidden="true" />}
         </button>
 
         {openSections.questions && (
-          <div className="p-4 space-y-2.5">
+          <div id="accordion-section-questions" role="region" aria-labelledby="accordion-btn-questions" className="p-4 space-y-2.5">
             {analysis.questionsToConsider.map((q) => (
               <div
                 key={q.id}
@@ -494,7 +494,7 @@ export const AnalysisSection: React.FC<AnalysisSectionProps> = ({
                   <span className="text-[10px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded">
                     {q.category}
                   </span>
-                  {q.clauseRef && <span className="font-mono text-[10px] text-slate-400">{q.clauseRef}</span>}
+                  {q.clauseRef && <span className="font-mono text-[10px] text-slate-500">{q.clauseRef}</span>}
                 </div>
                 <h4 className="font-semibold text-slate-900 leading-snug">{q.question}</h4>
                 <p className="text-[11px] text-slate-600">{q.rationale}</p>

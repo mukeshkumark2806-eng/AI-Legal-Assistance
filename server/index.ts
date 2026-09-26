@@ -60,6 +60,28 @@ app.get('/', (_req, res) => {
   });
 });
 
+// Global error handling middleware (sanitizes errors, handles invalid JSON and limits)
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  if (err instanceof SyntaxError && 'status' in err && (err as any).status === 400) {
+    return res.status(400).json({
+      error: 'Invalid JSON payload received',
+      code: 'INVALID_JSON'
+    });
+  }
+  if (err?.type === 'entity.too.large') {
+    return res.status(413).json({
+      error: 'Payload exceeds maximum limit (20MB)',
+      code: 'PAYLOAD_TOO_LARGE'
+    });
+  }
+  console.error('[Server Error]', err?.message || err);
+  const isProd = process.env.NODE_ENV === 'production';
+  return res.status(err?.status || 500).json({
+    error: isProd ? 'Internal Server Error' : (err?.message || 'Internal Server Error'),
+    code: err?.code || 'SERVER_ERROR'
+  });
+});
+
 // Start server
 if (
   process.env.NODE_ENV !== 'test' &&

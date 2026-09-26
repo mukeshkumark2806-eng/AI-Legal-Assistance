@@ -1,4 +1,4 @@
-import { validateLegalFile, formatFileSize } from './src/services/document/fileValidator.ts';
+import { validateLegalFile } from './src/services/document/fileValidator.ts';
 import { identifyHeading, detectSections } from './src/services/document/sectionDetector.ts';
 
 console.log('=== RUNNING TESTS FOR LEGALLENS AI EXTRACTION PIPELINE ===\n');

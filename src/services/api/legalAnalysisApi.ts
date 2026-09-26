@@ -3,8 +3,7 @@ import type {
   Clause,
   DocumentAnalysis,
   ActionChecklistItem,
-  LawyerQuestion,
-  ImportanceLevel
+  LawyerQuestion
 } from '../../types/document';
 
 export interface AnalysisStageUpdate {
@@ -65,7 +64,7 @@ export async function checkBackendHealth(): Promise<{
       hasApiKey: Boolean(data.hasApiKey),
       model: data.model
     };
-  } catch (err: any) {
+  } catch {
     return {
       isOnline: false,
       hasApiKey: false,

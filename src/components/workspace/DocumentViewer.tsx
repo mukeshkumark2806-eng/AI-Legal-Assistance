@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import type { LegalDocument } from '../../types/document';
 import { 
-  CheckCircle2, 
   Eye, 
   FileText, 
   Maximize2, 
   Minimize2, 
   Printer, 
   Search, 
-  Sparkles, 
   ZoomIn, 
   ZoomOut 
 } from 'lucide-react';
@@ -100,13 +98,15 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
         <div className="flex items-center gap-2 ml-auto">
           {/* Search in doc */}
           <div className="relative hidden sm:block">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <label htmlFor="doc-viewer-search" className="sr-only">Search in extracted document text</label>
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" aria-hidden="true" />
             <input
+              id="doc-viewer-search"
               type="text"
               placeholder="Search in extracted text..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8 pr-3 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white w-36 lg:w-48 transition-all"
+              className="pl-8 pr-3 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white w-36 lg:w-48 transition-all"
             />
           </div>
 
@@ -115,55 +115,65 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             <button
               type="button"
               onClick={() => setHighlightAllClauses(!highlightAllClauses)}
-              className={`hidden md:inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border transition-colors cursor-pointer ${
+              aria-pressed={highlightAllClauses}
+              aria-label="Toggle visual clause highlighting"
+              className={`hidden md:inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                 highlightAllClauses
                   ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
                   : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
               }`}
               title="Toggle visual clause highlighting"
             >
-              <Eye className="w-3.5 h-3.5" />
+              <Eye className="w-3.5 h-3.5" aria-hidden="true" />
               <span>Highlights</span>
             </button>
           )}
 
           {/* Zoom controls */}
-          <div className="flex items-center bg-slate-50 border border-slate-200 rounded-lg p-0.5">
+          <div className="flex items-center bg-slate-50 border border-slate-200 rounded-lg p-0.5" role="group" aria-label="Document zoom controls">
             <button
+              type="button"
               onClick={() => handleZoom(-10)}
-              className="p-1 text-slate-600 hover:bg-white hover:text-slate-900 rounded transition-colors cursor-pointer"
+              className="p-1 text-slate-600 hover:bg-white hover:text-slate-900 rounded transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
               title="Zoom out"
+              aria-label="Zoom out document"
             >
-              <ZoomOut className="w-3.5 h-3.5" />
+              <ZoomOut className="w-3.5 h-3.5" aria-hidden="true" />
             </button>
-            <span className="text-[11px] font-mono px-2 text-slate-600 select-none">
+            <span className="text-[11px] font-mono px-2 text-slate-600 select-none" aria-live="polite">
               {zoomLevel}%
             </span>
             <button
+              type="button"
               onClick={() => handleZoom(10)}
-              className="p-1 text-slate-600 hover:bg-white hover:text-slate-900 rounded transition-colors cursor-pointer"
+              className="p-1 text-slate-600 hover:bg-white hover:text-slate-900 rounded transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
               title="Zoom in"
+              aria-label="Zoom in document"
             >
-              <ZoomIn className="w-3.5 h-3.5" />
+              <ZoomIn className="w-3.5 h-3.5" aria-hidden="true" />
             </button>
           </div>
 
           {/* Expand / Collapse */}
           <button
+            type="button"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg border border-slate-200 transition-colors cursor-pointer"
+            className="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg border border-slate-200 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
             title={isExpanded ? 'Exit full screen' : 'Expand viewer'}
+            aria-label={isExpanded ? 'Exit full screen' : 'Expand document viewer'}
           >
-            {isExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+            {isExpanded ? <Minimize2 className="w-3.5 h-3.5" aria-hidden="true" /> : <Maximize2 className="w-3.5 h-3.5" aria-hidden="true" />}
           </button>
 
           {/* Export / Print */}
           <button
+            type="button"
             onClick={() => window.print()}
-            className="hidden lg:flex p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg border border-slate-200 transition-colors cursor-pointer"
+            className="hidden lg:flex p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg border border-slate-200 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
             title="Print or export document"
+            aria-label="Print or export document"
           >
-            <Printer className="w-3.5 h-3.5" />
+            <Printer className="w-3.5 h-3.5" aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -200,7 +210,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
 
           {/* Document Sections */}
           <div className="space-y-8">
-            {doc.sections.map((section, sIdx) => {
+            {doc.sections.map((section) => {
               return (
                 <div key={section.id} id={`section-${section.id}`} className="scroll-mt-6">
                   {/* Section Header with optional page indicator */}
@@ -294,14 +304,23 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                           <div
                             key={gIdx}
                             id={primaryClause ? `clause-${primaryClause.id}` : undefined}
+                            role={primaryClause ? 'button' : undefined}
+                            tabIndex={primaryClause ? 0 : undefined}
+                            aria-label={primaryClause ? `Inspect clause: ${primaryClause.title}` : undefined}
                             onClick={() => {
                               if (primaryClause) onSelectClause(primaryClause.id);
                             }}
+                            onKeyDown={primaryClause ? (e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                onSelectClause(primaryClause.id);
+                              }
+                            } : undefined}
                             className={`relative text-xs sm:text-sm leading-relaxed p-4 rounded-xl transition-all duration-200 font-serif ${
                               isSelected
                                 ? 'bg-amber-50/90 border-2 border-amber-400 shadow-xs ring-2 ring-amber-400/20'
                                 : highlightAllClauses && primaryClause
-                                ? 'bg-indigo-50/20 hover:bg-indigo-50/50 border border-indigo-200/50 cursor-pointer'
+                                ? 'bg-indigo-50/20 hover:bg-indigo-50/50 border border-indigo-200/50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500'
                                 : 'hover:bg-slate-50/60 border border-transparent'
                             }`}
                           >

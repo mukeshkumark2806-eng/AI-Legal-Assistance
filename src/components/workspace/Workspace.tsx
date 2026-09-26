@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import type { LegalDocument, ClauseCategory } from '../../types/document';
 import { DocumentSidebar } from './DocumentSidebar';
 import { DocumentViewer } from './DocumentViewer';
@@ -11,12 +11,8 @@ import {
   CheckCircle2, 
   CheckSquare, 
   FileCheck2, 
-  FileText, 
   Layers, 
-  MessageSquare, 
-  Scale, 
-  Sparkles, 
-  SlidersHorizontal 
+  Scale 
 } from 'lucide-react';
 import { DemoBanner } from '../ui/DisclaimerBanner';
 import { analyzeDocumentWithAi } from '../../services/api/legalAnalysisApi';
@@ -59,14 +55,12 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   // Mobile active pane
   const [mobileActiveView, setMobileActiveView] = useState<'document' | 'sidebar' | 'panel'>('document');
 
-  // Update selectedClauseId when document changes
-  useEffect(() => {
-    if (doc.clauses.length > 0) {
-      setSelectedClauseId(doc.clauses[0].id);
-    } else {
-      setSelectedClauseId(null);
-    }
-  }, [doc]);
+  // Reset selectedClauseId when document changes without cascading effect
+  const [prevDocId, setPrevDocId] = useState(doc.id);
+  if (doc.id !== prevDocId) {
+    setPrevDocId(doc.id);
+    setSelectedClauseId(doc.clauses.length > 0 ? doc.clauses[0].id : null);
+  }
 
   const handleSelectClause = (clauseId: string) => {
     setSelectedClauseId(clauseId);
@@ -166,14 +160,37 @@ export const Workspace: React.FC<WorkspaceProps> = ({
 
   const isUploadedDoc = doc.isUploaded || doc.source === 'uploaded';
 
+  // Arrow key navigation between right panel tabs
+  const tabList: RightPanelTab[] = ['analysis', 'clauses', 'chat', 'actions'];
+  const handleTabKeyDown = (e: React.KeyboardEvent, currentTab: RightPanelTab) => {
+    const currentIndex = tabList.indexOf(currentTab);
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      const nextTab = tabList[(currentIndex + 1) % tabList.length];
+      setRightPanelTab(nextTab);
+      const nextEl = document.getElementById(`workspace-tab-${nextTab}`);
+      nextEl?.focus();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const prevTab = tabList[(currentIndex - 1 + tabList.length) % tabList.length];
+      setRightPanelTab(prevTab);
+      const prevEl = document.getElementById(`workspace-tab-${prevTab}`);
+      prevEl?.focus();
+    }
+  };
+
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden bg-slate-50">
       {/* Top Banner: Distinguish Real Uploaded Document vs Demo Sample */}
       <div className="px-4 py-2 bg-white border-b border-slate-200">
         {isUploadedDoc ? (
-          <div className="bg-emerald-50/90 border border-emerald-200 px-3.5 py-2 rounded-lg flex items-center justify-between gap-3 text-xs text-emerald-950">
+          <div 
+            role="status"
+            aria-live="polite"
+            className="bg-emerald-50/90 border border-emerald-200 px-3.5 py-2 rounded-lg flex items-center justify-between gap-3 text-xs text-emerald-950"
+          >
             <div className="flex items-center gap-2 min-w-0">
-              <span className="flex h-2 w-2 relative shrink-0">
+              <span className="flex h-2 w-2 relative shrink-0" aria-hidden="true">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
               </span>
@@ -189,7 +206,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               </span>
             </div>
             <span className="hidden sm:inline-flex items-center gap-1 font-mono text-[11px] text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded shrink-0">
-              <CheckCircle2 className="w-3 h-3 text-emerald-600" /> {doc.isAiAnalyzed ? 'Analysis Active' : 'Extracted Locally'}
+              <CheckCircle2 className="w-3 h-3 text-emerald-600" aria-hidden="true" /> {doc.isAiAnalyzed ? 'Analysis Active' : 'Extracted Locally'}
             </span>
           </div>
         ) : (
@@ -198,12 +215,16 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       </div>
 
       {/* Mobile Sub-Navigation Bar */}
-      <div className="lg:hidden flex items-center justify-around border-b border-slate-200 bg-white px-2 py-1.5 text-xs">
+      <div 
+        role="navigation"
+        aria-label="Workspace views"
+        className="lg:hidden flex items-center justify-around border-b border-slate-200 bg-white px-2 py-1.5 text-xs"
+      >
         <button
           type="button"
           onClick={() => setMobileActiveView('sidebar')}
-          className={`px-3 py-1.5 rounded-md font-medium ${
-            mobileActiveView === 'sidebar' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600'
+          className={`px-3 py-1.5 rounded-md font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+            mobileActiveView === 'sidebar' ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600'
           }`}
         >
           Outline ({doc.sections.length})
@@ -211,8 +232,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         <button
           type="button"
           onClick={() => setMobileActiveView('document')}
-          className={`px-3 py-1.5 rounded-md font-medium ${
-            mobileActiveView === 'document' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600'
+          className={`px-3 py-1.5 rounded-md font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+            mobileActiveView === 'document' ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600'
           }`}
         >
           Document Text
@@ -220,8 +241,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         <button
           type="button"
           onClick={() => setMobileActiveView('panel')}
-          className={`px-3 py-1.5 rounded-md font-medium ${
-            mobileActiveView === 'panel' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600'
+          className={`px-3 py-1.5 rounded-md font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+            mobileActiveView === 'panel' ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600'
           }`}
         >
           AI Intelligence Panel
@@ -261,56 +282,84 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           mobileActiveView === 'panel' ? 'block' : 'hidden lg:flex'
         }`}>
           {/* Right Panel Navigation Tabs */}
-          <div className="flex border-b border-slate-200 bg-slate-50/50 p-1.5 gap-1 shrink-0">
+          <div 
+            role="tablist"
+            aria-label="Intelligence Panel Sections"
+            className="flex border-b border-slate-200 bg-slate-50/50 p-1.5 gap-1 shrink-0"
+          >
             <button
               type="button"
+              role="tab"
+              id="workspace-tab-analysis"
+              aria-selected={rightPanelTab === 'analysis'}
+              aria-controls="workspace-panel-analysis"
+              tabIndex={rightPanelTab === 'analysis' ? 0 : -1}
+              onKeyDown={(e) => handleTabKeyDown(e, 'analysis')}
               onClick={() => setRightPanelTab('analysis')}
-              className={`flex-1 py-2 px-2 text-[11px] font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 py-2 px-2 text-[11px] font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                 rightPanelTab === 'analysis'
                   ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
-                  : 'text-slate-500 hover:text-slate-800'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <FileCheck2 className="w-3.5 h-3.5 text-indigo-600" />
+              <FileCheck2 className="w-3.5 h-3.5 text-indigo-600" aria-hidden="true" />
               <span>Analysis</span>
             </button>
 
             <button
               type="button"
+              role="tab"
+              id="workspace-tab-clauses"
+              aria-selected={rightPanelTab === 'clauses'}
+              aria-controls="workspace-panel-clauses"
+              tabIndex={rightPanelTab === 'clauses' ? 0 : -1}
+              onKeyDown={(e) => handleTabKeyDown(e, 'clauses')}
               onClick={() => setRightPanelTab('clauses')}
-              className={`flex-1 py-2 px-2 text-[11px] font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 py-2 px-2 text-[11px] font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                 rightPanelTab === 'clauses'
                   ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
-                  : 'text-slate-500 hover:text-slate-800'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <Scale className="w-3.5 h-3.5 text-blue-600" />
+              <Scale className="w-3.5 h-3.5 text-blue-600" aria-hidden="true" />
               <span>Clauses</span>
             </button>
 
             <button
               type="button"
+              role="tab"
+              id="workspace-tab-chat"
+              aria-selected={rightPanelTab === 'chat'}
+              aria-controls="workspace-panel-chat"
+              tabIndex={rightPanelTab === 'chat' ? 0 : -1}
+              onKeyDown={(e) => handleTabKeyDown(e, 'chat')}
               onClick={() => setRightPanelTab('chat')}
-              className={`flex-1 py-2 px-2 text-[11px] font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 py-2 px-2 text-[11px] font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                 rightPanelTab === 'chat'
                   ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
-                  : 'text-slate-500 hover:text-slate-800'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <Bot className="w-3.5 h-3.5 text-purple-600" />
+              <Bot className="w-3.5 h-3.5 text-purple-600" aria-hidden="true" />
               <span>Ask Document</span>
             </button>
 
             <button
               type="button"
+              role="tab"
+              id="workspace-tab-actions"
+              aria-selected={rightPanelTab === 'actions'}
+              aria-controls="workspace-panel-actions"
+              tabIndex={rightPanelTab === 'actions' ? 0 : -1}
+              onKeyDown={(e) => handleTabKeyDown(e, 'actions')}
               onClick={() => setRightPanelTab('actions')}
-              className={`flex-1 py-2 px-2 text-[11px] font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 py-2 px-2 text-[11px] font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                 rightPanelTab === 'actions'
                   ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
-                  : 'text-slate-500 hover:text-slate-800'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <CheckSquare className="w-3.5 h-3.5 text-emerald-600" />
+              <CheckSquare className="w-3.5 h-3.5 text-emerald-600" aria-hidden="true" />
               <span>Actions</span>
             </button>
           </div>
@@ -318,40 +367,54 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           {/* Right Panel Body */}
           <div className="flex-1 overflow-y-auto p-4">
             {rightPanelTab === 'analysis' && (
-              <AnalysisSection
-                document={doc}
-                onJumpToClause={handleJumpToClauseRef}
-                onTriggerAiAnalysis={handleTriggerAiAnalysis}
-                isAnalyzing={isAnalyzingAi}
-              />
+              <div 
+                role="tabpanel"
+                id="workspace-panel-analysis"
+                aria-labelledby="workspace-tab-analysis"
+                tabIndex={0}
+                className="focus:outline-none"
+              >
+                <AnalysisSection
+                  document={doc}
+                  onJumpToClause={handleJumpToClauseRef}
+                  onTriggerAiAnalysis={handleTriggerAiAnalysis}
+                  isAnalyzing={isAnalyzingAi}
+                />
+              </div>
             )}
 
             {rightPanelTab === 'clauses' && (
-              <div className="space-y-3">
+              <div 
+                role="tabpanel"
+                id="workspace-panel-clauses"
+                aria-labelledby="workspace-tab-clauses"
+                tabIndex={0}
+                className="space-y-3 focus:outline-none"
+              >
                 <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                   <h3 className="text-sm font-bold text-slate-900">
                     Clause Intelligence Cards
                   </h3>
-                  <span className="text-xs text-slate-400 font-mono">
+                  <span className="text-xs text-slate-500 font-mono">
                     {filteredClauses.length} of {doc.clauses.length}
                   </span>
                 </div>
 
                 {doc.clauses.length === 0 ? (
                   <div className="p-6 text-center space-y-3 bg-slate-50 rounded-2xl border border-slate-200">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center mx-auto">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center mx-auto" aria-hidden="true">
                       <Layers className="w-5 h-5" />
                     </div>
                     <h4 className="text-xs font-bold text-slate-900">
                       {doc.sections.length} Structural Sections Extracted
                     </h4>
-                    <p className="text-[11px] text-slate-500 leading-relaxed">
+                    <p className="text-[11px] text-slate-600 leading-relaxed">
                       Raw document text has been structured into {doc.sections.length} sections. Document analysis classifies individual clauses and risk tags.
                     </p>
                     <button
                       type="button"
                       onClick={() => setRightPanelTab('analysis')}
-                      className="text-xs text-indigo-600 font-medium hover:underline cursor-pointer"
+                      className="text-xs text-indigo-600 font-medium hover:underline cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded p-1"
                     >
                       View Extracted Section Hierarchy →
                     </button>
@@ -359,16 +422,17 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                 ) : (
                   <>
                     {/* Filter chips */}
-                    <div className="flex flex-wrap gap-1">
+                    <div role="group" aria-label="Filter clauses by category" className="flex flex-wrap gap-1">
                       {categories.map((cat) => (
                         <button
                           key={cat}
                           type="button"
+                          aria-pressed={clauseCategoryFilter === cat}
                           onClick={() => setClauseCategoryFilter(cat)}
-                          className={`text-[10px] font-medium px-2 py-0.5 rounded-md transition-colors cursor-pointer ${
+                          className={`text-[10px] font-medium px-2 py-0.5 rounded-md transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                             clauseCategoryFilter === cat
-                              ? 'bg-indigo-600 text-white shadow-2xs'
-                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                              ? 'bg-indigo-600 text-white shadow-2xs font-semibold'
+                              : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                           }`}
                         >
                           {cat}
@@ -396,16 +460,30 @@ export const Workspace: React.FC<WorkspaceProps> = ({
             )}
 
             {rightPanelTab === 'chat' && (
-              <div className="h-full">
-                <ChatPanel document={doc} onJumpToClause={handleJumpToClauseRef} />
+              <div 
+                role="tabpanel"
+                id="workspace-panel-chat"
+                aria-labelledby="workspace-tab-chat"
+                tabIndex={0}
+                className="h-full focus:outline-none"
+              >
+                <ChatPanel key={doc.id} document={doc} onJumpToClause={handleJumpToClauseRef} />
               </div>
             )}
 
             {rightPanelTab === 'actions' && (
-              <ActionCenter
-                document={doc}
-                onJumpToClause={handleJumpToClauseRef}
-              />
+              <div 
+                role="tabpanel"
+                id="workspace-panel-actions"
+                aria-labelledby="workspace-tab-actions"
+                tabIndex={0}
+                className="focus:outline-none"
+              >
+                <ActionCenter
+                  document={doc}
+                  onJumpToClause={handleJumpToClauseRef}
+                />
+              </div>
             )}
           </div>
         </div>

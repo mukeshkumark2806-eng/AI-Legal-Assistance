@@ -5,7 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
-import { detectSections, identifyHeading, isAgreementOrDocumentTitle, isVersionLabel, isTestingOrDisclaimerNotice } from '../src/services/document/sectionDetector.ts';
+import { detectSections, identifyHeading } from '../src/services/document/sectionDetector.ts';
 import { analyzeDocumentWithGroq } from '../server/services/legalAnalyzer.ts';
 
 dotenv.config();

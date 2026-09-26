@@ -5,7 +5,8 @@ export interface FileValidationResult {
   error?: string;
 }
 
-const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25 MB
+const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
+export const MAX_FILE_SIZE_MB = 20;
 
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
@@ -15,7 +16,15 @@ export function formatFileSize(bytes: number): string {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 }
 
-export function validateLegalFile(file: File): FileValidationResult {
+export function validateLegalFile(file: any): FileValidationResult {
+  if (!file || typeof file !== 'object' || typeof file.size !== 'number') {
+    return {
+      isValid: false,
+      formattedSize: '0 Bytes',
+      error: 'Invalid file object provided. Please select a valid document.'
+    };
+  }
+
   const formattedSize = formatFileSize(file.size);
 
   // 1. Check for empty file (0 bytes)
@@ -32,7 +41,7 @@ export function validateLegalFile(file: File): FileValidationResult {
     return {
       isValid: false,
       formattedSize,
-      error: `File size (${formattedSize}) exceeds the 25 MB limit. Please select a smaller document.`
+      error: `File size (${formattedSize}) exceeds the 20 MB limit. Please select a smaller document.`
     };
   }
 
