@@ -13,8 +13,18 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
 
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: '20mb' }));
-app.use(express.urlencoded({ extended: true, limit: '20mb' }));
+
+// In Vercel serverless functions, Vercel pre-parses req.body.
+// Only consume the stream via express body parsers when req.body has not been pre-parsed.
+app.use((req, res, next) => {
+  if (req.body !== undefined) {
+    return next();
+  }
+  express.json({ limit: '20mb' })(req, res, (err) => {
+    if (err) return next(err);
+    express.urlencoded({ extended: true, limit: '20mb' })(req, res, next);
+  });
+});
 
 // Request logger for observability
 app.use((req, _res, next) => {
